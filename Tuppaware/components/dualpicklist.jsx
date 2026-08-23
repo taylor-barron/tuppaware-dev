@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { replaceDefaults } from "../utils/replacedefaults";
-import useIsBelowBreakPoint from "../utils/watchmobilebreakpoint";
+import { replaceDefaults } from "../../moving/copiedTuppaware/utils/replacedefaults";
+import useIsBelowBreakPoint from "../../moving/copiedTuppaware/utils/watchmobilebreakpoint";
 import Flexbox from "../containers/flexbox";
-import Header from "../text/header";
-import Icon from "../text/icon";
-import TextInput from "../inputs/textinput";
+import Header from "../../moving/copiedTuppaware/text/header";
+import Icon from "../../moving/copiedTuppaware/text/icon";
+import TextInput from "../../moving/copiedTuppaware/inputs/textinput";
 
 export default function DualPickList({
   writeable = true,
