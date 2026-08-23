@@ -1,4 +1,5 @@
-// import FlexBox from '../Tuppaware/containers/flexbox';
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { replaceDefaults } from "../utils/replacedefaults";
 import Button from "../buttons/button";

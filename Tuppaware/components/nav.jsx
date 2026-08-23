@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { replaceDefaults } from "../utils/replacedefaults";
 import useIsBelowBreakPoint from "../utils/watchmobilebreakpoint";

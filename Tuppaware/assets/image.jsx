@@ -1,4 +1,4 @@
-import { replaceDefaults } from "../../moving/copiedTuppaware/utils/replacedefaults";
+import { replaceDefaults } from "../utils/replacedefaults";
 
 export default function Image({
   src,
