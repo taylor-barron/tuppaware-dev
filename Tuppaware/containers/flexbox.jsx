@@ -1,12 +1,19 @@
+"use client";
+
+import { replaceDefaults } from "../utils/replacedefaults";
+
 export default function FlexBox({
   children,
   className = "",
   style = {},
+  defaultStyle = { backgroundColor: "#f0f0f0" },
   vertical = "center",
   horizontal = "center",
   direction = "row",
   ...props
 }) {
+  const usedStyle = replaceDefaults(style, defaultStyle); 
+
   const horizontalValue =
     horizontal === "left" ? "flex-start" :
     horizontal === "right" ? "flex-end" :
@@ -39,7 +46,7 @@ export default function FlexBox({
   };
 
   return (
-    <div className={className} style={{ ...baseStyles, ...style }} {...props}>
+    <div className={className} style={{ ...baseStyles, ...usedStyle }} {...props}>
       {children}
     </div>
   );
