@@ -5,7 +5,7 @@ export default function Header({
   size = 1,
   className = "",
   style = {},
-  defaultStyles = { fontSize: "2.25rem", lineHeight: "2.5rem", fontWeight: 500 },
+  defaultStyles = { fontSize: "2.25rem", fontFamily: "system-ui", lineHeight: "2.5rem", fontWeight: 500 },
   ...props
 }) {
   const parsed = Number.parseInt(String(size), 10);
