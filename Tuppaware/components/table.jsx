@@ -26,7 +26,7 @@ export default function Table({
 
   tableClassName = "",
   tableStyle = {},
-  defaultTableStyle = { width: "100%", borderCollapse: "collapse", border: "1px 1px 0 0 solid #ddd" },
+  defaultTableStyle = { maxWidth: "100%", width: "100%", borderCollapse: "collapse", border: "1px 1px 0 0 solid #ddd" },
 
   tableHeadClassName = "",
   tableHeadStyle = {},
@@ -142,8 +142,6 @@ export default function Table({
         startWidths: liveWidths,
       };
 
-      setColumnWidths(liveWidths);
-
       window.addEventListener("mousemove", handleResize);
       window.addEventListener("mouseup", stopResize);
       document.body.style.cursor = "col-resize";
@@ -179,6 +177,7 @@ export default function Table({
 
   const getHeaderStyle = (index) => ({
     ...tableHeadCellStyleObject,
+    boxSizing: "border-box",
     position: "relative",
     width: columnWidths[index] ? `${columnWidths[index]}px` : undefined,
     borderRight: index < totalColumns - 1 ? "1px solid #ddd" : undefined,
@@ -190,6 +189,7 @@ export default function Table({
 
   const getBodyCellStyle = (index) => ({
     padding: "8px",
+    boxSizing: "border-box",
     borderRight: index < totalColumns - 1 ? "1px solid #ddd" : undefined,
     borderBottom: "1px solid #ddd",
     width: columnWidths[index] ? `${columnWidths[index]}px` : undefined,
