@@ -6,7 +6,7 @@ export default function FlexBox({
   children,
   className = "",
   style = {},
-  defaultStyle = { backgroundColor: "#f0f0f0" },
+  defaultStyle = { backgroundColor: "#ffffff" },
   vertical = "center",
   horizontal = "center",
   direction = "row",
