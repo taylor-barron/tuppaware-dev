@@ -35,16 +35,16 @@ export default function Table({
   columnHeaders = [],
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
-  defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd" },
+  defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
 
   rowData = [],
   minColWidth = 80,
   oddRowStyle = {},
-  defaultOddRowStyle = { backgroundColor: "#ffffff" },
+  defaultOddRowStyle = { backgroundColor: "#ffffff", fontFamily: "system-ui" },
   evenRowStyle = {},
-  defaultEvenRowStyle = { backgroundColor: "#f9f9f9" },
+  defaultEvenRowStyle = { backgroundColor: "#f9f9f9", fontFamily: "system-ui" },
   selectedRowStyle = {},
-  defaultSelectedRowStyle = { backgroundColor: "#d9edf7" },
+  defaultSelectedRowStyle = { backgroundColor: "#d9edf7", fontFamily: "system-ui" },
 
   onRowClick = () => {},
 }) {
