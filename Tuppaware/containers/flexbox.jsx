@@ -12,7 +12,7 @@ export default function FlexBox({
   direction = "row",
   ...props
 }) {
-  const usedStyle = replaceDefaults(style, defaultStyle); 
+  const usedStyle = replaceDefaults(defaultStyle, style); 
 
   const horizontalValue =
     horizontal === "left" ? "flex-start" :

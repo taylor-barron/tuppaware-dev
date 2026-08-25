@@ -40,6 +40,7 @@ export default function DropdownButton({
     borderLeft: "0",
     borderRadius: "0 4px 4px 0",
     background: "#f0f0f0",
+    backgroundColor: "#f0f0f0",
     boxSizing: "border-box",
   },
   dropdownSelectContainerClassName = "",
