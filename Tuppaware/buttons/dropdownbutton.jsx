@@ -12,7 +12,12 @@ export default function DropdownButton({
   outerContainerClassName = "",
 
   buttonContainerStyle = {},
-  defaultButtonContainerStyle = { display: "inline-flex", position: "relative", cursor: "pointer" },
+  defaultButtonContainerStyle = {
+    display: "inline-flex",
+    position: "relative",
+    cursor: "pointer",
+    alignItems: "stretch",
+  },
   buttonContainerClassName = "",
 
   onButtonClick,
@@ -27,20 +32,21 @@ export default function DropdownButton({
   dropdownSelectContainerStyle = {},
   defaultDropdownSelectContainerStyle = {
     display: "flex",
-    height: "100%",
+    alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
     padding: "0 0.5rem",
     border: "1px solid #ccc",
     borderLeft: "0",
     borderRadius: "0 4px 4px 0",
-    backgroundColor: "#f0f0f0",
+    background: "#f0f0f0",
+    boxSizing: "border-box",
   },
   dropdownSelectContainerClassName = "",
   dropdownIconClosedClassName = "fa fa-caret-down",
   dropdownIconOpenClassName = "fa fa-caret-up",
   dropdownIconStyle = {},
-  defaultDropdownIconStyle = { margin: "0.25rem 0.5rem", fontSize: "1rem" },
+  defaultDropdownIconStyle = { margin: 0, fontSize: "1rem", lineHeight: 1 },
 
   dropdownContainerStyle = {},
   defaultDropdownContainerStyle = {
