@@ -18,11 +18,12 @@ export default function Table({
   actionColWidth = 140,
   actionFunction = () => {},
   actionColunName = "Actions",
-  useButton = false,
+
+  useActionButton = false,
   actionButtonData = {},
   useDropdownButton = false,
   dropdownButtonData = {},
-  actionText = "Action",
+  childrenData = {},
 
   tableClassName = "",
   tableStyle = {},
@@ -262,18 +263,16 @@ export default function Table({
               ))}
 
               {useActionsColumn && (
-                useDropdownButton ? (
-                  <td style={getBodyCellStyle(columnHeaders.length)}>
+                <td style={getBodyCellStyle(columnHeaders.length)}>
+                  {useDropdownButton ? (
                     <DropdownButton
                       outerContainerStyle={dropdownButtonData.outerContainerStyle}
                       outerContainerClassName={dropdownButtonData.outerContainerClassName}
-
                       buttonContainerStyle={dropdownButtonData.buttonContainerStyle}
                       buttonContainerClassName={dropdownButtonData.buttonContainerClassName}
-
                       onButtonClick={(e) => {
                         e.stopPropagation();
-                        dropdownButtonData.onButtonClick(row, rowIndex);
+                        dropdownButtonData.onButtonClick?.(row, rowIndex);
                       }}
                       buttonClassName={dropdownButtonData.buttonClassName}
                       buttonStyle={dropdownButtonData.buttonStyle}
@@ -281,11 +280,9 @@ export default function Table({
                       leadingIconStyle={dropdownButtonData.leadingIconStyle}
                       trailingIconClassName={dropdownButtonData.trailingIconClassName}
                       trailingIconStyle={dropdownButtonData.trailingIconStyle}
-
                       dropdownContainerStyle={dropdownButtonData.dropdownContainerStyle}
                       dropdownContainerClassName={dropdownButtonData.dropdownContainerClassName}
                       dropdownIconStyle={dropdownButtonData.dropdownIconStyle}
-
                       showDropdown={dropdownButtonData.showDropdown}
                       bottomRowsToShowUpwardsDropdown={dropdownButtonData.bottomRowsToShowUpwardsDropdown}
                       dropdownItems={dropdownButtonData.dropdownItems}
@@ -293,11 +290,10 @@ export default function Table({
                       actionElementClassName={dropdownButtonData.actionElementClassName}
                       urlElementStyle={dropdownButtonData.urlElementStyle}
                       urlElementClassName={dropdownButtonData.urlElementClassName}
-                      
-                    >{dropdownButtonData.text}</DropdownButton>
-                  </td>
-                ) : useButton ? (
-                  <td style={getBodyCellStyle(columnHeaders.length)}>
+                    >
+                      {dropdownButtonData.text}
+                    </DropdownButton>
+                  ) : useActionButton ? (
                     <Button
                       style={actionButtonData.style}
                       className={actionButtonData.className}
@@ -305,22 +301,15 @@ export default function Table({
                       leadingIconStyle={actionButtonData.leadingIconStyle}
                       trailingIconClassName={actionButtonData.trailingIconClassName}
                       trailingIconStyle={actionButtonData.trailingIconStyle}
-                      onClick={actionButtonData.onClick}
-
-                    >{actionButtonData.text}</Button>
-                  </td>
-                ) : (
-                  <td style={getBodyCellStyle(columnHeaders.length)}>
-                    <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert(`Action for row ${rowIndex + 1}`);
+                        actionButtonData.onButtonClick?.(row, rowIndex);
                       }}
                     >
-                      Action
-                    </button>
-                  </td>
-                )
+                      {actionButtonData.text}
+                    </Button>
+                  ) : null}
+                </td>
               )}
             </tr>
           );
