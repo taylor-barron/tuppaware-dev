@@ -259,6 +259,15 @@ export default function Table({
               : { ...defaultOddRowStyle, ...oddRowStyle };
 
           const cells = Array.isArray(row?.data) ? row.data : [];
+          const rowDropdownItems = Array.isArray(dropdownButtonData.dropdownItems)
+            ? dropdownButtonData.dropdownItems.map((item) => ({
+                ...item,
+                action:
+                  typeof item?.action === "function"
+                    ? () => item.action(row, rowIndex)
+                    : item?.action,
+              }))
+            : [];
 
           return (
             <tr key={rowIndex} style={rowStyle} onClick={() => handleRowClick(row, rowIndex)}>
@@ -291,7 +300,7 @@ export default function Table({
                       dropdownIconStyle={dropdownButtonData.dropdownIconStyle}
                       showDropdown={dropdownButtonData.showDropdown}
                       bottomRowsToShowUpwardsDropdown={dropdownButtonData.bottomRowsToShowUpwardsDropdown}
-                      dropdownItems={dropdownButtonData.dropdownItems}
+                      dropdownItems={rowDropdownItems}
                       actionElementStyle={dropdownButtonData.actionElementStyle}
                       actionElementClassName={dropdownButtonData.actionElementClassName}
                       urlElementStyle={dropdownButtonData.urlElementStyle}
