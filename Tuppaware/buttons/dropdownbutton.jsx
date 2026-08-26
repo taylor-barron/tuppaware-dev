@@ -17,6 +17,7 @@ export default function DropdownButton({
     position: "relative",
     cursor: "pointer",
     alignItems: "stretch",
+    zIndex: 1,
   },
   buttonContainerClassName = "",
 
@@ -61,7 +62,8 @@ export default function DropdownButton({
     borderRadius: "4px",
     cursor: "pointer",
     backgroundColor: "#f0f0f0",
-    color: "#000"
+    color: "#000",
+    zIndex: 1000,
   },
   dropdownContainerClassName = "",
 
