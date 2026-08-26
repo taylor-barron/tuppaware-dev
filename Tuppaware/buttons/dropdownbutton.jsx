@@ -70,7 +70,7 @@ export default function DropdownButton({
   showDropdownOnTop = false,
   dropdownItems = [],
   actionElementStyle = {},
-  defaultActionElementStyle = { padding: "0.25rem 0.5rem", cursor: "pointer" },
+  defaultActionElementStyle = { padding: "0.25rem 0.5rem", cursor: "pointer", backgroundColor: "#f0f0f0" },
   actionElementClassName = "",
   urlElementStyle = {},
   defaultUrlElementStyle = { padding: "0.25rem 0.5rem", cursor: "pointer", textDecoration: "none", color: "inherit" },
