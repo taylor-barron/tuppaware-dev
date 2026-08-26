@@ -105,6 +105,18 @@ export default function DropdownButton({
     setIsDropdownOpen((prev) => !prev);
   };
 
+  const handleDropdownActionClick = (event, item) => {
+    event.preventDefault();
+    event.stopPropagation();
+    item?.action?.();
+    setIsDropdownOpen(false);
+  };
+
+  const handleDropdownLinkClick = (event) => {
+    event.stopPropagation();
+    setIsDropdownOpen(false);
+  };
+
   return (
     <Flexbox className={outerContainerClassName} style={usedOuterContainerStyle} vertical="top" horizontal="left" direction="column">
       <Flexbox className={buttonContainerClassName} style={usedButtonContainerStyle} vertical="top" horizontal="left" direction="row">
@@ -136,11 +148,22 @@ export default function DropdownButton({
         <Flexbox className={dropdownContainerClassName} style={usedDropdownContainerStyle} vertical="top" horizontal="left" direction="column">
           {dropdownItems.map((item, index) => (
             item.action ? (
-              <Flexbox key={index} style={usedActionElementStyle} className={actionElementClassName} onClick={() => item.action && item.action()}>
+              <Flexbox
+                key={index}
+                style={usedActionElementStyle}
+                className={actionElementClassName}
+                onClick={(event) => handleDropdownActionClick(event, item)}
+              >
                 {item.title}
               </Flexbox>
             ) : (
-              <a key={index} href={item.url ? item.url : "#"} style={usedUrlElementStyle} className={urlElementClassName}>
+              <a
+                key={index}
+                href={item.url ? item.url : "#"}
+                style={usedUrlElementStyle}
+                className={urlElementClassName}
+                onClick={handleDropdownLinkClick}
+              >
                 {item.title}
               </a>
             )
