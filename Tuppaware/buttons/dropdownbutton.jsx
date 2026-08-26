@@ -94,8 +94,15 @@ export default function DropdownButton({
   const usedUrlElementStyle = replaceDefaults(defaultUrlElementStyle, urlElementStyle);
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+
+  const handleMainButtonClick = (event) => {
+    onButtonClick?.(event);
+  };
+
+  const handleToggleDropdownClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDropdownOpen((prev) => !prev);
   };
 
   return (
@@ -104,7 +111,7 @@ export default function DropdownButton({
         <Button
           className={buttonClassName}
           style={usedButtonStyle}
-          onClick={onButtonClick}
+          onClick={handleMainButtonClick}
           leadingIconClassName={leadingIconClassName}
           leadingIconStyle={leadingIconStyle}
           trailingIconClassName={trailingIconClassName}
@@ -113,7 +120,14 @@ export default function DropdownButton({
           {children}
         </Button>
 
-        <Flexbox className={dropdownSelectContainerClassName} style={usedDropdownSelectContainerStyle} vertical="top" horizontal="left" direction="column" onClick={toggleDropdown}>
+        <Flexbox
+          className={dropdownSelectContainerClassName}
+          style={usedDropdownSelectContainerStyle}
+          vertical="top"
+          horizontal="left"
+          direction="column"
+          onClick={handleToggleDropdownClick}
+        >
           <Icon className={isDropdownOpen ? dropdownIconOpenClassName : dropdownIconClosedClassName} style={usedDropdownIconStyle} />
         </Flexbox>
       </Flexbox>
