@@ -42,6 +42,7 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
+        {/* test setting column widths */}
         <Table
           tableStyle={{ margin: "5rem", width: "90%" }}
           columnHeaders={["Name", "Age", "Location"]}
@@ -61,6 +62,7 @@ export default function DevContainer() {
           actionFunction={(rowData, rowIndex) => {
             alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(rowData)}`);
           }}
+          
           actionColumnName="Actions"
           actionButtonData={{
             text: "Review",

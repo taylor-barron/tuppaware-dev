@@ -199,6 +199,12 @@ export default function Table({
     textOverflow: "ellipsis",
   });
 
+  const getActionCellStyle = (index) => ({
+    ...getBodyCellStyle(index),
+    overflow: "visible",
+    position: "relative",
+  });
+
   return (
     <table className={tableClassName} style={{ tableLayout: "fixed", ...tableStyleObject }}>
       <thead className={tableHeadClassName} style={{ ...tableHeadStyleObject }}>
@@ -263,7 +269,7 @@ export default function Table({
               ))}
 
               {useActionsColumn && (
-                <td style={getBodyCellStyle(columnHeaders.length)}>
+                <td style={getActionCellStyle(columnHeaders.length)}>
                   {useDropdownButton ? (
                     <DropdownButton
                       outerContainerStyle={dropdownButtonData.outerContainerStyle}
