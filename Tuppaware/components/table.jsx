@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { replaceDefaults } from "../utils/replacedefaults";
 import Button from "../buttons/button";
 import DropdownButton from "../buttons/dropdownbutton";
@@ -17,13 +17,14 @@ export default function Table({
   useActionsColumn = true,
   actionColWidth = 140,
   actionFunction = () => {},
-  actionColunName = "Actions",
+  actionColumn = { name: "Actions" },
 
   useActionButton = false,
   actionButtonData = {},
   useDropdownButton = false,
   dropdownButtonData = {},
-  childrenData = {},
+
+  onColumnsChange = () => {},
 
   tableClassName = "",
   tableStyle = {},
@@ -33,7 +34,7 @@ export default function Table({
   tableHeadStyle = {},
   defaultTableHeadStyle = { backgroundColor: "#f2f2f2", fontWeight: "bold", textAlign: "left" },
 
-  columnHeaders = [],
+  columns = [],
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
@@ -60,69 +61,123 @@ export default function Table({
     return i >= 0 ? i : null;
   });
 
-  const totalColumns = columnHeaders.length + (useActionsColumn ? 1 : 0);
+  const totalColumns = columns.length + (useActionsColumn ? 1 : 0);
   const [columnWidths, setColumnWidths] = useState([]);
   const headerRefs = useRef([]);
   const resizeStateRef = useRef(null);
+  const lastEmittedSignatureRef = useRef("");
+  const isResizingRef = useRef(false);
+  const latestWidthsRef = useRef([]);
 
-  useEffect(() => {
-    const i = rows.findIndex((r) => !!r?.selected);
-    setSelectedRowIndex(i >= 0 ? i : null);
-  }, [rowData]);
+  const emitColumnChanges = useCallback(
+    (widths) => {
+      const nextColumns = columns.map((column, idx) => {
+        const nextLength = widths[idx];
+        if (!column || !Number.isFinite(nextLength) || nextLength <= 0) return column;
+        return column.length === nextLength ? column : { ...column, length: nextLength };
+      });
 
-  useEffect(() => {
+      const nextActionColumn =
+        useActionsColumn && Number.isFinite(widths[columns.length]) && widths[columns.length] > 0
+          ? { ...actionColumn, length: widths[columns.length] }
+          : actionColumn;
+
+      const nextSignature = JSON.stringify({
+        columns: nextColumns.map((c) => c?.length ?? null),
+        actionLength: nextActionColumn?.length ?? null,
+      });
+
+      if (nextSignature === lastEmittedSignatureRef.current) return;
+      lastEmittedSignatureRef.current = nextSignature;
+
+      onColumnsChange({
+        columns: nextColumns,
+        actionColumn: nextActionColumn,
+      });
+    },
+    [actionColumn, columns, onColumnsChange, useActionsColumn]
+  );
+
+  const getMeasuredWidth = useCallback(
+    (idx) => {
+      const w = headerRefs.current[idx]?.offsetWidth;
+      if (typeof w === "number" && w > 0) return w;
+      if (useActionsColumn && idx === totalColumns - 1) return actionColWidth;
+      return 160;
+    },
+    [actionColWidth, totalColumns, useActionsColumn]
+  );
+
+  useLayoutEffect(() => {
     if (totalColumns === 0) {
       setColumnWidths([]);
+      latestWidthsRef.current = [];
       return;
     }
 
-    const raf = requestAnimationFrame(() => {
-      const measured = Array.from({ length: totalColumns }, (_, idx) => {
-        const w = headerRefs.current[idx]?.offsetWidth;
-        if (typeof w === "number" && w > 0) return w;
-        if (useActionsColumn && idx === totalColumns - 1) return actionColWidth;
-        return 160;
-      });
+    if (isResizingRef.current) return;
 
-      setColumnWidths((prev) => {
-        if (prev.length === totalColumns && prev.every((w) => typeof w === "number" && w > 0)) {
-          return prev;
-        }
-        return measured;
-      });
+    const nextWidths = Array.from({ length: totalColumns }, (_, idx) => {
+      const column = columns[idx];
+
+      if (column && Number.isFinite(column.length) && column.length > 0) {
+        return column.length;
+      }
+
+      if (useActionsColumn && idx === totalColumns - 1 && Number.isFinite(actionColumn?.length) && actionColumn.length > 0) {
+        return actionColumn.length;
+      }
+
+      return getMeasuredWidth(idx);
     });
 
-    return () => cancelAnimationFrame(raf);
-  }, [totalColumns, useActionsColumn]);
+    setColumnWidths(nextWidths);
+    latestWidthsRef.current = nextWidths;
+    emitColumnChanges(nextWidths);
+  }, [
+    actionColumn,
+    columns,
+    emitColumnChanges,
+    getMeasuredWidth,
+    totalColumns,
+    useActionsColumn,
+  ]);
+
+  const handleResize = useCallback(
+    (event) => {
+      const state = resizeStateRef.current;
+      if (!state) return;
+
+      const { index, startX, startWidths } = state;
+      const leftStart = startWidths[index];
+      const rightStart = startWidths[index + 1];
+      if (leftStart == null || rightStart == null) return;
+
+      const delta = event.clientX - startX;
+      const maxGrow = rightStart - minColWidth;
+      const maxShrink = leftStart - minColWidth;
+      const appliedDelta = Math.max(-maxShrink, Math.min(delta, maxGrow));
+
+      const next = [...startWidths];
+      next[index] = leftStart + appliedDelta;
+      next[index + 1] = rightStart - appliedDelta;
+
+      latestWidthsRef.current = next;
+      setColumnWidths(next);
+    },
+    [minColWidth]
+  );
 
   const stopResize = useCallback(() => {
     resizeStateRef.current = null;
+    isResizingRef.current = false;
+    emitColumnChanges(latestWidthsRef.current);
+
     window.removeEventListener("mousemove", handleResize);
     window.removeEventListener("mouseup", stopResize);
     document.body.style.cursor = "";
     document.body.style.userSelect = "";
-  }, []);
-
-  const handleResize = useCallback((event) => {
-    const state = resizeStateRef.current;
-    if (!state) return;
-
-    const { index, startX, startWidths } = state;
-    const leftStart = startWidths[index];
-    const rightStart = startWidths[index + 1];
-    if (leftStart == null || rightStart == null) return;
-
-    const delta = event.clientX - startX;
-    const maxGrow = rightStart - minColWidth;
-    const maxShrink = leftStart - minColWidth;
-    const appliedDelta = Math.max(-maxShrink, Math.min(delta, maxGrow));
-
-    const next = [...startWidths];
-    next[index] = leftStart + appliedDelta;
-    next[index + 1] = rightStart - appliedDelta;
-
-    setColumnWidths(next);
-  }, []);
+  }, [emitColumnChanges, handleResize]);
 
   const startResize = useCallback(
     (event, index) => {
@@ -132,10 +187,21 @@ export default function Table({
       if (index >= totalColumns - 1) return;
 
       const liveWidths = Array.from({ length: totalColumns }, (_, idx) => {
+        const column = columns[idx];
+
+        if (column && Number.isFinite(column.length) && column.length > 0) return column.length;
+        if (useActionsColumn && idx === totalColumns - 1 && Number.isFinite(actionColumn?.length) && actionColumn.length > 0) {
+          return actionColumn.length;
+        }
+
         const w = headerRefs.current[idx]?.offsetWidth;
         if (typeof w === "number" && w > 0) return w;
-        return columnWidths[idx] ?? (useActionsColumn && idx === totalColumns - 1 ? actionColWidth : 160);
+
+        return idx === totalColumns - 1 && useActionsColumn ? actionColWidth : 160;
       });
+
+      isResizingRef.current = true;
+      latestWidthsRef.current = liveWidths;
 
       resizeStateRef.current = {
         index,
@@ -148,7 +214,7 @@ export default function Table({
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
     },
-    [columnWidths, handleResize, stopResize, totalColumns, useActionsColumn]
+    [actionColumn, actionColWidth, columns, handleResize, stopResize, totalColumns, useActionsColumn]
   );
 
   useEffect(() => {
@@ -209,7 +275,7 @@ export default function Table({
     <table className={tableClassName} style={{ tableLayout: "fixed", ...tableStyleObject }}>
       <thead className={tableHeadClassName} style={{ ...tableHeadStyleObject }}>
         <tr>
-          {columnHeaders.map((header, index) => (
+          {columns.map((header, index) => (
             <th
               key={index}
               ref={(el) => {
@@ -218,7 +284,7 @@ export default function Table({
               className={tableHeadCellClassName}
               style={getHeaderStyle(index)}
             >
-              {header}
+              {header.name}
               {index < totalColumns - 1 && (
                 <div
                   onMouseDown={(e) => startResize(e, index)}
@@ -238,12 +304,12 @@ export default function Table({
           {useActionsColumn && (
             <th
               ref={(el) => {
-                headerRefs.current[columnHeaders.length] = el;
+                headerRefs.current[columns.length] = el;
               }}
               className={tableHeadCellClassName}
-              style={getHeaderStyle(columnHeaders.length)}
+              style={getHeaderStyle(columns.length)}
             >
-              {actionColunName}
+              {actionColumn.name}
             </th>
           )}
         </tr>
@@ -278,7 +344,7 @@ export default function Table({
               ))}
 
               {useActionsColumn && (
-                <td style={getActionCellStyle(columnHeaders.length)}>
+                <td style={getActionCellStyle(columns.length)}>
                   {useDropdownButton ? (
                     <DropdownButton
                       outerContainerStyle={dropdownButtonData.outerContainerStyle}

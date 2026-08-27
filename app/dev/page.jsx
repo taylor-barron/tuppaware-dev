@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from 'react';
+
 import Button from '../../Tuppaware/buttons/button';
 import DropdownButton from '../../Tuppaware/buttons/dropdownbutton';
 import FlexBox from '../../Tuppaware/containers/flexbox';
@@ -13,6 +15,14 @@ import TuppawareLogo from '../../public/tuppaware.png';
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
 export default function DevContainer() {
+  const [columns, setColumns] = useState([
+    { name: "Name", length: 150 },
+    { name: "Age" },
+    { name: "Location" },
+  ]);
+
+  const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
+
   return (
     <>
       <Nav
@@ -45,7 +55,13 @@ export default function DevContainer() {
         {/* test setting column widths */}
         <Table
           tableStyle={{ margin: "5rem", width: "90%" }}
-          columnHeaders={["Name", "Age", "Location"]}
+          columns={columns}
+          actionColumn={actionColumn}
+          onColumnsChange={({ columns: nextColumns, actionColumn: nextActionColumn }) => {
+            setColumns(nextColumns);
+            setActionColumn(nextActionColumn);
+          }}
+
           rowData={[
             { data: ["John Doe", 30, "New York"], selected: true },
             { data: ["Jane Smith", 25, "Los Angeles"], selected: false },
@@ -55,15 +71,14 @@ export default function DevContainer() {
           ]}
 
           onRowClick={(rowData, rowIndex) => {
-            alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(rowData)}`);
+            alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(columns)} clicked: ${JSON.stringify(actionColumn)}`);
           }}
 
           useDropdownButton={true}
           actionFunction={(rowData, rowIndex) => {
-            alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(rowData)}`);
+            alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(actionColumn)}`);
           }}
           
-          actionColumnName="Actions"
           actionButtonData={{
             text: "Review",
             leadingIconClassName: "fa fa-eye",
