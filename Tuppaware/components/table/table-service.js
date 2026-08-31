@@ -260,3 +260,19 @@ export function getActionCellStyle(index, columnWidths, totalColumns) {
     position: "relative",
   };
 }
+
+export function ensureRowsHaveOrder(rows = [], rowOrderKey = "order") {
+  if (!Array.isArray(rows)) return [];
+
+  return rows.map((row, index) => {
+    if (row && typeof row === "object" && !Array.isArray(row)) {
+      const hasOrder = Number.isFinite(row[rowOrderKey]);
+      return hasOrder ? row : { ...row, [rowOrderKey]: index };
+    }
+
+    return {
+      data: [row],
+      [rowOrderKey]: index,
+    };
+  });
+}

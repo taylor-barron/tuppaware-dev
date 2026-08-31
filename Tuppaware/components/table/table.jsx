@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { replaceDefaults } from "../../utils/replacedefaults";
 import useIsBelowBreakPoint from "../../utils/watchmobilebreakpoint";
 import {
@@ -14,6 +14,7 @@ import {
   getHeaderStyle as getHeaderStyleHelper,
   getBodyCellStyle as getBodyCellStyleHelper,
   getActionCellStyle as getActionCellStyleHelper,
+  ensureRowsHaveOrder,
   
 } from "./table-service";
 import TableDesktop from "./table-desktop";
@@ -49,6 +50,7 @@ export default function Table({
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
 
   rowData = [],
+  rowOrderKey = "order",
   minColWidth = 80,
   oddRowStyle = {},
   defaultOddRowStyle = { backgroundColor: "#ffffff", fontFamily: "system-ui" },
@@ -56,6 +58,10 @@ export default function Table({
   defaultEvenRowStyle = { backgroundColor: "#f9f9f9", fontFamily: "system-ui" },
   selectedRowStyle = {},
   defaultSelectedRowStyle = { backgroundColor: "#d9edf7", fontFamily: "system-ui" },
+
+  sortDescendingIcon = "fa fa-caret-down",
+  sortAscendingIcon = "fa fa-caret-up",
+  unsortedIcon = "fa fa-sort",
 
   onColumnsChange = NOOP,
   onColumnSort = NOOP,
@@ -68,7 +74,15 @@ export default function Table({
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
   const tableHeadCellStyleObject = replaceDefaults(defaultTableHeadCellStyle, tableHeadCellStyle);
 
-  const rows = Array.isArray(rowData) ? rowData : Array.isArray(rowData?.data) ? rowData.data : [];
+  const rows = useMemo(() => {
+    const sourceRows = Array.isArray(rowData)
+      ? rowData
+      : Array.isArray(rowData?.data)
+        ? rowData.data
+        : [];
+
+    return ensureRowsHaveOrder(sourceRows, rowOrderKey);
+  }, [rowData, rowOrderKey]);
 
   const [selectedRowIndex, setSelectedRowIndex] = useState(() => {
     const i = rows.findIndex((r) => !!r?.selected);

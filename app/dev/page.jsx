@@ -65,6 +65,7 @@ export default function DevContainer() {
             setActionColumn(nextActionColumn);
           }}
 
+          // need to set an original position on initiation
           rowData={[
             { data: ["John Doe", 30, "New York"], selected: true },
             { data: ["Jane Smith", 25, "Los Angeles"], selected: false },
