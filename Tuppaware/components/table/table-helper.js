@@ -51,6 +51,14 @@ export function getMeasuredWidth(
   return fallbackWidth;
 }
 
+function areWidthsEqual(a = [], b = []) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 export function useInitializeColumnWidths({
   totalColumns,
   setColumnWidths,
@@ -89,6 +97,8 @@ export function useInitializeColumnWidths({
 
       return getMeasuredWidthCallback(idx);
     });
+
+    if (areWidthsEqual(latestWidthsRef.current, nextWidths)) return;
 
     setColumnWidths(nextWidths);
     latestWidthsRef.current = nextWidths;
