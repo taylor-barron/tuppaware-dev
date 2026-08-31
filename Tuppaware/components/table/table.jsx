@@ -15,7 +15,7 @@ import {
   getBodyCellStyle as getBodyCellStyleHelper,
   getActionCellStyle as getActionCellStyleHelper,
   
-} from "./table-helper";
+} from "./table-service";
 import TableDesktop from "./table-desktop";
 import TableMobile from "./table-mobile";
 
@@ -58,8 +58,9 @@ export default function Table({
   defaultSelectedRowStyle = { backgroundColor: "#d9edf7", fontFamily: "system-ui" },
 
   onColumnsChange = NOOP,
+  onColumnSort = NOOP,
   onRowClick = NOOP,
-  
+
 }) {
   const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
 

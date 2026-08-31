@@ -2,7 +2,7 @@
 
 import Button from "../../buttons/button";
 import DropdownButton from "../../buttons/dropdownbutton";
-import { renderCellValue } from "./table-helper";
+import { renderCellValue } from "./table-service";
 
 export default function TableDesktop({
   tableClassName,
