@@ -52,7 +52,10 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
-        {/* test setting column widths */}
+        {/* need to do sorting */}
+        {/* need to set up icons for sorting */}
+        {/* need to test no button */}
+        {/* need to test default mobile columns and selected mobile columns */}
         <Table
           tableStyle={{ margin: "5rem", width: "90%" }}
           columns={columns}
