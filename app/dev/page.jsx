@@ -7,7 +7,7 @@ import DropdownButton from '../../Tuppaware/buttons/dropdownbutton';
 import FlexBox from '../../Tuppaware/containers/flexbox';
 import Header from '../../Tuppaware/text/header';
 import Nav from '../../Tuppaware/components/nav';
-import Table from '../../Tuppaware/components/table';
+import Table from '../../Tuppaware/components/table/table';
 import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
