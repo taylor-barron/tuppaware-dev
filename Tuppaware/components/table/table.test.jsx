@@ -37,7 +37,10 @@ describe("Table", () => {
     );
 
     await user.click(screen.getByText("Taylor"));
-    expect(onRowClick).toHaveBeenCalledWith({ data: ["Taylor", "32"] }, 0);
+    expect(onRowClick).toHaveBeenCalledWith(
+      expect.objectContaining({ data: ["Taylor", "32"] }),
+      0
+    );
   });
 
   it("allows columns to be resized", () => {
@@ -149,7 +152,10 @@ describe("Table", () => {
     );
 
     await user.click(screen.getByText("Edit"));
-    expect(onButtonClick).toHaveBeenCalledWith({ data: ["Taylor", "32"] }, 0);
+    expect(onButtonClick).toHaveBeenCalledWith(
+      expect.objectContaining({ data: ["Taylor", "32"] }),
+      0
+    );
   });
 
   it("can open dropdown button menu", async () => {
@@ -197,7 +203,10 @@ describe("Table", () => {
     );
 
     await user.click(screen.getByText("More"));
-    expect(onButtonClick).toHaveBeenCalledWith({ data: ["Taylor", "32"] }, 0);
+    expect(onButtonClick).toHaveBeenCalledWith(
+      expect.objectContaining({ data: ["Taylor", "32"] }),
+      0
+    );
   });
 
   it("displays dropdown button text + icons + dropdown options", async () => {
@@ -255,7 +264,10 @@ describe("Table", () => {
     if (caret) await user.click(caret); // ensure menu is open if main click didn't open it
 
     await user.click(screen.getByText("Option 2"));
-    expect(optionAction).toHaveBeenCalledWith({ data: ["Taylor", "32"] }, 0);
+    expect(optionAction).toHaveBeenCalledWith(
+      expect.objectContaining({ data: ["Taylor", "32"] }),
+      0
+    );
   });
 
   it("applies style overrides from props", () => {
@@ -297,5 +309,62 @@ describe("Table", () => {
 
     // Intentionally failing for now: mobile mode is not implemented yet.
     expect(screen.getByRole("table")).toHaveStyle("display: block");
+  });
+
+  it("sets default row order on initialization when missing", async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+
+    const rowsWithoutOrder = [
+      { data: ["Taylor", "32"] },
+      { data: ["Alex", "28"] },
+    ];
+
+    render(
+      <Table
+        columns={baseColumns}
+        rowData={rowsWithoutOrder}
+        useActionsColumn={false}
+        onRowClick={onRowClick}
+      />
+    );
+
+    await user.click(screen.getByText("Alex"));
+
+    expect(onRowClick).toHaveBeenCalledTimes(1);
+    const [clickedRow, clickedIndex] = onRowClick.mock.calls[0];
+
+    expect(clickedIndex).toBe(1);
+    expect(clickedRow).toMatchObject({
+      data: ["Alex", "28"],
+      order: 1,
+    });
+  });
+
+  it("preserves existing row order on initialization", async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+
+    const rowsWithOrder = [{ data: ["Taylor", "32"], order: 99 }];
+
+    render(
+      <Table
+        columns={baseColumns}
+        rowData={rowsWithOrder}
+        useActionsColumn={false}
+        onRowClick={onRowClick}
+      />
+    );
+
+    await user.click(screen.getByText("Taylor"));
+
+    expect(onRowClick).toHaveBeenCalledTimes(1);
+    const [clickedRow, clickedIndex] = onRowClick.mock.calls[0];
+
+    expect(clickedIndex).toBe(0);
+    expect(clickedRow).toMatchObject({
+      data: ["Taylor", "32"],
+      order: 99,
+    });
   });
 });
