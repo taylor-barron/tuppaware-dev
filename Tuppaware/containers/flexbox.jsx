@@ -17,6 +17,9 @@ export default function FlexBox({
   const horizontalValue =
     horizontal === "left" ? "flex-start" :
     horizontal === "right" ? "flex-end" :
+    horizontal === "space-between" ? "space-between" :
+    horizontal === "space-around" ? "space-around" :
+    horizontal === "space-evenly" ? "space-evenly" :
     "center";
 
   const verticalValue =
