@@ -118,6 +118,8 @@ export default function Table({
     columns,
     useActionsColumn,
     actionColumn,
+    headerRefs,
+    actionColWidth,
     getMeasuredWidthCallback,
     emitColumnChangesCallback,
   });
@@ -217,6 +219,7 @@ export default function Table({
     dropdownButtonData,
     useActionButton,
     actionButtonData,
+    onColumnSort,
   };
 
   return (
@@ -229,6 +232,9 @@ export default function Table({
       totalColumns={totalColumns}
       getHeaderStyle={getHeaderStyle}
       startResize={startResize}
+      sortDescendingIcon={sortDescendingIcon}
+      sortAscendingIcon={sortAscendingIcon}
+      unsortedIcon={unsortedIcon}
     />
   ));
 }

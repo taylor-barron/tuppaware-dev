@@ -1,8 +1,11 @@
 "use client";
 
+import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
 import Button from "../../buttons/button";
 import DropdownButton from "../../buttons/dropdownbutton";
 import { renderCellValue } from "./table-service";
+import FlexBox from "../../containers/flexbox";
+import Icon from "../../text/icon";
 
 export default function TableDesktop({
   tableClassName,
@@ -33,6 +36,10 @@ export default function TableDesktop({
   totalColumns,
   getHeaderStyle,
   startResize,
+  onColumnSort,
+  sortDescendingIcon,
+  sortAscendingIcon,
+  unsortedIcon,
 
 }) {
   return (
@@ -48,7 +55,13 @@ export default function TableDesktop({
               className={tableHeadCellClassName}
               style={getHeaderStyle(index)}
             >
-              {header.name}
+              <FlexBox direction="row" horizontal="space-between" onClick={() => onColumnSort(index)} style={{ cursor: "pointer" }}>
+                {header.name}
+
+                {header.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}
+                {header.sort === SORT_DESC && <Icon className={sortDescendingIcon} />}
+                {(header.sort === SORT_NONE || header.sort == null || header.sort === undefined) && <Icon className={unsortedIcon} />}
+              </FlexBox>
               {index < totalColumns - 1 && (
                 <div
                   onMouseDown={(e) => startResize(e, index)}

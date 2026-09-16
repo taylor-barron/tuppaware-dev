@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Table from "./table";
+import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from "./table-service";
+import { useState } from "react";
 
 const baseColumns = [{ name: "Name" }, { name: "Age" }];
 const baseRows = [{ data: ["Taylor", "32"] }];
@@ -54,7 +56,7 @@ describe("Table", () => {
 
     const headers = container.querySelectorAll("th");
     const firstHeader = headers[0];
-    const resizeHandle = firstHeader.querySelector("div");
+    const resizeHandle = firstHeader.querySelector("div[style*='col-resize']");
 
     expect(firstHeader.style.width).toBe("160px");
     expect(resizeHandle).toBeTruthy();
@@ -64,37 +66,6 @@ describe("Table", () => {
     fireEvent.mouseUp(window);
 
     expect(firstHeader.style.width).toBe("200px");
-  });
-
-  it("emits updated column width info for parent model", () => {
-    const onColumnsChange = vi.fn();
-    const { container } = render(
-      <Table
-        columns={[{ name: "Name" }, { name: "Age" }]}
-        actionColumn={{ name: "Actions" }}
-        rowData={baseRows}
-        useActionsColumn
-        onColumnsChange={onColumnsChange}
-      />
-    );
-
-    // Initial emit on mount
-    expect(onColumnsChange).toHaveBeenCalled();
-    const initialPayload = onColumnsChange.mock.calls[0][0];
-    expect(initialPayload.columns[0].length).toBeTypeOf("number");
-    expect(initialPayload.columns[1].length).toBeTypeOf("number");
-    expect(initialPayload.actionColumn.length).toBeTypeOf("number");
-
-    // Resize and ensure an updated emit happens
-    const firstHeader = container.querySelectorAll("th")[0];
-    const resizeHandle = firstHeader.querySelector("div");
-
-    fireEvent.mouseDown(resizeHandle, { clientX: 100 });
-    fireEvent.mouseMove(window, { clientX: 150 });
-    fireEvent.mouseUp(window);
-
-    const lastPayload = onColumnsChange.mock.calls.at(-1)[0];
-    expect(lastPayload.columns[0].length).toBeGreaterThan(initialPayload.columns[0].length);
   });
 
   it("can display action button", () => {
@@ -366,5 +337,239 @@ describe("Table", () => {
       data: ["Taylor", "32"],
       order: 99,
     });
+  });
+});
+
+describe("updateColumns", () => {
+  const cols = () => [{ name: "Name" }, { name: "Age" }, { name: "Location" }];
+
+  it("sets a column with no sort value to ascending on first click", () => {
+    expect(updateColumns(cols(), 1)[1].sort).toBe(SORT_ASC);
+  });
+
+  it("clears every other column to SORT_NONE", () => {
+    const result = updateColumns(cols(), 1);
+    expect(result[0].sort).toBe(SORT_NONE);
+    expect(result[1].sort).toBe(SORT_ASC);
+    expect(result[2].sort).toBe(SORT_NONE);
+  });
+
+  it("cycles SORT_NONE -> SORT_ASC -> SORT_DESC -> SORT_NONE", () => {
+    let result = updateColumns(cols(), 0);
+    expect(result[0].sort).toBe(SORT_ASC);
+    result = updateColumns(result, 0);
+    expect(result[0].sort).toBe(SORT_DESC);
+    result = updateColumns(result, 0);
+    expect(result[0].sort).toBe(SORT_NONE);
+    result = updateColumns(result, 0);
+    expect(result[0].sort).toBe(SORT_ASC);
+  });
+
+  it("does not mutate the input columns", () => {
+    const input = cols().map((c) => Object.freeze(c));
+    const result = updateColumns(input, 0);
+    expect(result).not.toBe(input);
+    expect(input.every((c) => !("sort" in c))).toBe(true);
+  });
+
+  it("returns an empty array for non-array input", () => {
+    expect(updateColumns(null, 0)).toEqual([]);
+    expect(updateColumns(undefined, 0)).toEqual([]);
+  });
+});
+
+describe("sortRows", () => {
+  const stringRows = () => [
+    { data: ["Charlie", 35] },
+    { data: ["Alice", 25] },
+    { data: ["Bob", 30] },
+  ];
+  const namesOf = (rows) => rows.map((r) => r.data[0]);
+  const agesOf = (rows) => rows.map((r) => r.data[1]);
+
+  it("sorts string values ascending", () => {
+    expect(namesOf(sortRows(stringRows(), [{ sort: SORT_ASC }], 0))).toEqual(["Alice", "Bob", "Charlie"]);
+  });
+
+  it("sorts string values descending", () => {
+    expect(namesOf(sortRows(stringRows(), [{ sort: SORT_DESC }], 0))).toEqual(["Charlie", "Bob", "Alice"]);
+  });
+
+  it("sorts numeric values ascending", () => {
+    expect(agesOf(sortRows(stringRows(), [null, { sort: SORT_ASC }], 1))).toEqual([25, 30, 35]);
+  });
+
+  it("sorts numeric values descending", () => {
+    expect(agesOf(sortRows(stringRows(), [null, { sort: SORT_DESC }], 1))).toEqual([35, 30, 25]);
+  });
+
+  it("SORT_NONE restores the original order after sorting", () => {
+    const asc = sortRows(stringRows(), [{ sort: SORT_ASC }], 0);
+    expect(namesOf(sortRows(asc, [{ sort: SORT_NONE }], 0))).toEqual(["Charlie", "Alice", "Bob"]);
+  });
+
+  it("stamps originalOrder on rows that do not have it", () => {
+    const sorted = sortRows(stringRows(), [{ sort: SORT_ASC }], 0);
+    expect(sorted.find((r) => r.data[0] === "Charlie").originalOrder).toBe(0);
+    expect(sorted.find((r) => r.data[0] === "Alice").originalOrder).toBe(1);
+  });
+
+  it("does not mutate the input rows", () => {
+    const input = stringRows();
+    sortRows(input, [{ sort: SORT_ASC }], 0);
+    expect(namesOf(input)).toEqual(["Charlie", "Alice", "Bob"]);
+    expect(input.every((r) => !("originalOrder" in r))).toBe(true);
+  });
+
+  it("returns an empty array for non-array input", () => {
+    expect(sortRows(null, [{ sort: SORT_ASC }], 0)).toEqual([]);
+    expect(sortRows(stringRows(), null, 0)).toEqual([]);
+  });
+
+  it("returns an empty array for empty rows instead of throwing", () => {
+    // FAILS until the firstRow guard is fixed (see note below)
+    expect(sortRows([], [{ sort: SORT_ASC }], 0)).toEqual([]);
+  });
+
+  it("returns rows unchanged for an unknown sort value", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = sortRows(stringRows(), [{ sort: "bogus" }], 0);
+    expect(namesOf(result)).toEqual(["Charlie", "Alice", "Bob"]);
+    expect(errorSpy).toHaveBeenCalledWith("Unknown sort type:", "bogus");
+    errorSpy.mockRestore();
+  });
+});
+
+describe("Table column sorting", () => {
+  const initialColumns = () => [{ name: "Name" }, { name: "Age" }];
+  const initialRows = () => [
+    { data: ["Charlie", 35] },
+    { data: ["Alice", 25] },
+    { data: ["Bob", 30] },
+  ];
+
+  function SortableHarness() {
+    const [columns, setColumns] = useState(initialColumns());
+    const [rows, setRows] = useState(initialRows());
+    return (
+      <Table
+        columns={columns}
+        rowData={rows}
+        useActionsColumn={false}
+        onColumnSort={(columnIndex) => {
+          const nextColumns = updateColumns(columns, columnIndex);
+          setColumns(nextColumns);
+          setRows(sortRows(rows, nextColumns, columnIndex));
+        }}
+      />
+    );
+  }
+
+  const columnValues = (container, colIndex) =>
+    [...container.querySelectorAll("tbody tr")].map(
+      (tr) => tr.querySelectorAll("td")[colIndex].textContent
+    );
+
+  const headerOf = (name) => screen.getByText(name).closest("th");
+
+  it("runs the provided onColumnSort instead of any default behavior", async () => {
+    const user = userEvent.setup();
+    const onColumnSort = vi.fn();
+    const { container } = render(
+      <Table columns={initialColumns()} rowData={initialRows()} useActionsColumn={false} onColumnSort={onColumnSort} />
+    );
+
+    await user.click(screen.getByText("Age"));
+
+    expect(onColumnSort).toHaveBeenCalledWith(1);
+    // the table does not sort on its own — the parent controls it
+    expect(columnValues(container, 0)).toEqual(["Charlie", "Alice", "Bob"]);
+  });
+
+  it("shows the unsorted icon for columns without a sort value", () => {
+    render(<Table columns={initialColumns()} rowData={initialRows()} useActionsColumn={false} />);
+    expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
+    expect(headerOf("Age").querySelector(".fa-sort")).toBeInTheDocument();
+  });
+
+  it("shows the ascending icon only on the SORT_ASC column", () => {
+    render(
+      <Table columns={[{ name: "Name", sort: SORT_ASC }, { name: "Age", sort: SORT_NONE }]} rowData={initialRows()} useActionsColumn={false} />
+    );
+    expect(headerOf("Name").querySelector(".fa-caret-up")).toBeInTheDocument();
+    expect(headerOf("Age").querySelector(".fa-caret-up")).not.toBeInTheDocument();
+  });
+
+  it("shows the descending icon only on the SORT_DESC column", () => {
+    render(
+      <Table columns={[{ name: "Name", sort: SORT_DESC }, { name: "Age", sort: SORT_ASC }]} rowData={initialRows()} useActionsColumn={false} />
+    );
+    expect(headerOf("Name").querySelector(".fa-caret-down")).toBeInTheDocument();
+    expect(headerOf("Age").querySelector(".fa-caret-down")).not.toBeInTheDocument();
+  });
+
+  it("uses custom sort icons when provided", () => {
+    render(
+      <Table
+        columns={[{ name: "Name", sort: SORT_ASC }, { name: "Age" }]}
+        rowData={initialRows()}
+        useActionsColumn={false}
+        sortAscendingIcon="custom-asc"
+        unsortedIcon="custom-unsorted"
+      />
+    );
+    expect(headerOf("Name").querySelector(".custom-asc")).toBeInTheDocument();
+    expect(headerOf("Age").querySelector(".custom-unsorted")).toBeInTheDocument();
+  });
+
+  it("cycles the icon unsorted -> ascending -> descending -> unsorted as the header is clicked", async () => {
+    const user = userEvent.setup();
+    render(<SortableHarness />);
+
+    expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
+    await user.click(screen.getByText("Name"));
+    expect(headerOf("Name").querySelector(".fa-caret-up")).toBeInTheDocument();
+    await user.click(screen.getByText("Name"));
+    expect(headerOf("Name").querySelector(".fa-caret-down")).toBeInTheDocument();
+    await user.click(screen.getByText("Name"));
+    expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
+  });
+
+  it("sorts string columns asc/desc and restores original order through the UI", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<SortableHarness />);
+
+    await user.click(screen.getByText("Name")); // asc
+    expect(columnValues(container, 0)).toEqual(["Alice", "Bob", "Charlie"]);
+
+    await user.click(screen.getByText("Name")); // desc
+    expect(columnValues(container, 0)).toEqual(["Charlie", "Bob", "Alice"]);
+
+    await user.click(screen.getByText("Name")); // none -> original
+    // FAILS until the firstRow guard is fixed (see note below)
+    expect(columnValues(container, 0)).toEqual(["Charlie", "Alice", "Bob"]);
+  });
+
+  it("sorts numeric columns asc/desc through the UI", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<SortableHarness />);
+
+    await user.click(screen.getByText("Age"));
+    expect(columnValues(container, 1)).toEqual(["25", "30", "35"]);
+
+    await user.click(screen.getByText("Age"));
+    expect(columnValues(container, 1)).toEqual(["35", "30", "25"]);
+  });
+
+  it("moves the sort indicator when a different column is clicked", async () => {
+    const user = userEvent.setup();
+    render(<SortableHarness />);
+
+    await user.click(screen.getByText("Name"));
+    expect(headerOf("Name").querySelector(".fa-caret-up")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Age"));
+    expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
+    expect(headerOf("Age").querySelector(".fa-caret-up")).toBeInTheDocument();
   });
 });

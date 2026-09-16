@@ -1,5 +1,9 @@
 import { useCallback, useLayoutEffect } from "react";
 
+export const SORT_ASC = "asc";
+export const SORT_DESC = "desc";
+export const SORT_NONE = "none";
+
 export function useEmitColumnChanges(
   columns,
   actionColumn,
@@ -67,6 +71,8 @@ export function useInitializeColumnWidths({
   columns,
   useActionsColumn,
   actionColumn,
+  headerRefs,
+  actionColWidth,
   getMeasuredWidthCallback,
   emitColumnChangesCallback,
 }) {
@@ -80,12 +86,12 @@ export function useInitializeColumnWidths({
     if (isResizingRef.current) return;
 
     const nextWidths = Array.from({ length: totalColumns }, (_, idx) => {
+      const latest = latestWidthsRef.current[idx];
+      if (Number.isFinite(latest) && latest > 0) return latest;
+
       const column = columns[idx];
 
-      if (column && Number.isFinite(column.length) && column.length > 0) {
-        return column.length;
-      }
-
+      if (column && Number.isFinite(column.length) && column.length > 0) return column.length;
       if (
         useActionsColumn &&
         idx === totalColumns - 1 &&
@@ -95,7 +101,10 @@ export function useInitializeColumnWidths({
         return actionColumn.length;
       }
 
-      return getMeasuredWidthCallback(idx);
+      const w = headerRefs.current[idx]?.offsetWidth;
+      if (typeof w === "number" && w > 0) return w;
+
+      return idx === totalColumns - 1 && useActionsColumn ? actionColWidth : 160;
     });
 
     if (areWidthsEqual(latestWidthsRef.current, nextWidths)) return;
@@ -111,6 +120,8 @@ export function useInitializeColumnWidths({
     columns,
     useActionsColumn,
     actionColumn,
+    headerRefs,
+    actionColWidth,
     getMeasuredWidthCallback,
     emitColumnChangesCallback,
   ]);
@@ -177,8 +188,10 @@ export function startResizeInteraction({
   if (index >= totalColumns - 1) return;
 
   const liveWidths = Array.from({ length: totalColumns }, (_, idx) => {
-    const column = columns[idx];
+    const latest = latestWidthsRef.current[idx];
+    if (Number.isFinite(latest) && latest > 0) return latest;
 
+    const column = columns[idx];
     if (column && Number.isFinite(column.length) && column.length > 0) return column.length;
     if (
       useActionsColumn &&
@@ -274,5 +287,77 @@ export function ensureRowsHaveOrder(rows = [], rowOrderKey = "order") {
       data: [row],
       [rowOrderKey]: index,
     };
+  });
+}
+
+/**
+ * not used by default, must be incorporated manually
+ */
+export function sortRows(rows = [], columns = [], columnIndex) {
+  if (!Array.isArray(rows)) return [];
+  if (!Array.isArray(columns)) return [];
+
+  const firstRow = rows[0];
+  if (!Number.isFinite(firstRow?.originalOrder)) {
+    rows = rows.map((row, index) => ({ ...row, originalOrder: index }));
+  }
+
+  const currentSort = columns[columnIndex]?.sort;
+  if (currentSort === SORT_NONE) {
+    return rows
+      .map((row) => ({ ...row, order: row.originalOrder }))
+      .sort((a, b) => a.originalOrder - b.originalOrder);
+
+  } else if (currentSort === SORT_ASC) {
+    return rows.map((row) => ({ ...row })).sort((a, b) => {
+      const aValue = a.data[columnIndex];
+      const bValue = b.data[columnIndex];
+      if (aValue < bValue) return -1;
+      if (aValue > bValue) return 1;
+      return 0;
+    });
+
+  } else if (currentSort === SORT_DESC) {
+    return rows.map((row) => ({ ...row })).sort((a, b) => {
+      const aValue = a.data[columnIndex];
+      const bValue = b.data[columnIndex];
+      if (aValue > bValue) return -1;
+      if (aValue < bValue) return 1;
+      return 0;
+    });
+
+  } else {
+    console.error("Unknown sort type:", currentSort);
+    return rows.map((row) => ({ ...row }));
+  }
+}
+
+/**
+ * order of update: SORT_NONE -> SORT_ASC -> SORT_DESC -> SORT_NONE
+*/
+export function updateColumns(columns = [], columnIndex) {
+  if (!Array.isArray(columns)) return [];
+
+  const selectedColumn = columns[columnIndex];
+  const currentSort = selectedColumn?.sort;
+
+  let nextSort;
+  if (currentSort === SORT_NONE) {
+    nextSort = SORT_ASC;
+  } else if (currentSort === SORT_ASC) {
+    nextSort = SORT_DESC;
+  } else if (currentSort === SORT_DESC) {
+    nextSort = SORT_NONE;
+  } else {
+    nextSort = SORT_ASC;
+  }
+
+  return columns.map((column, index) => {
+    if (index === columnIndex) {
+      return { ...column, sort: nextSort };
+
+    } else {
+      return { ...column, sort: SORT_NONE };
+    }
   });
 }

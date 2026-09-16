@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from '../../Tuppaware/components/table/table-service';
 import Button from '../../Tuppaware/buttons/button';
 import DropdownButton from '../../Tuppaware/buttons/dropdownbutton';
 import FlexBox from '../../Tuppaware/containers/flexbox';
@@ -22,6 +23,14 @@ export default function DevContainer() {
   ]);
 
   const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
+
+  const [rows, setRows] = useState([
+    { data: ["John Doe", 30, "New York"], selected: true },
+    { data: ["Jane Smith", 25, "Los Angeles"], selected: false },
+    { data: ["Sam Johnson", 35, "Chicago"], selected: false },
+    { data: ["Emily Davis", 28, "Houston"], selected: false },
+    { data: ["Michael Brown", 32, "Phoenix"], selected: false },
+  ]);
 
   return (
     <>
@@ -65,14 +74,13 @@ export default function DevContainer() {
             setActionColumn(nextActionColumn);
           }}
 
-          // need to set an original position on initiation
-          rowData={[
-            { data: ["John Doe", 30, "New York"], selected: true },
-            { data: ["Jane Smith", 25, "Los Angeles"], selected: false },
-            { data: ["Sam Johnson", 35, "Chicago"], selected: false },
-            { data: ["Emily Davis", 28, "Houston"], selected: false },
-            { data: ["Michael Brown", 32, "Phoenix"], selected: false },
-          ]}
+          onColumnSort={(columnIndex) => {
+            const nextColumns = updateColumns(columns, columnIndex);
+            setColumns(nextColumns);
+            setRows(sortRows(rows, nextColumns, columnIndex));
+          }}
+
+          rowData={rows}
 
           onRowClick={(rowData, rowIndex) => {
             alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(columns)} clicked: ${JSON.stringify(actionColumn)}`);
