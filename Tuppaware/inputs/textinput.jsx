@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { replaceDefaults } from "../utils/replacedefaults";
 import FlexBox from "../containers/flexbox";

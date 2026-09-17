@@ -1,5 +1,5 @@
-import { replaceDefaults } from "../utils/replacedefaults";
-import Icon from "../text/Icon";
+import { replaceDefaults } from "../../Tuppaware/utils/replacedefaults";
+import Icon from "../text/icon";
 
 export default function Button({
   children,

@@ -1,10 +1,12 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { replaceDefaults } from "../utils/replacedefaults";
-import useIsBelowBreakPoint from "../utils/watchmobilebreakpoint";
-import Flexbox from "../containers/flexbox";
-import Header from "../text/header";
+import { replaceDefaults } from "../../Tuppaware/utils/replacedefaults";
+import useIsBelowBreakPoint from "../../Tuppaware/utils/watchmobilebreakpoint";
+import Flexbox from "../../Tuppaware/containers/flexbox";
+import Header from "../../Tuppaware/text/header";
 import Icon from "../text/icon";
-import TextInput from "../inputs/textinput";
+import TextInput from "../../Tuppaware/inputs/textinput";
 
 export default function DualPickList({
   writeable = true,

@@ -2,7 +2,7 @@ import React from "react";
 import { replaceDefaults } from "../utils/replacedefaults";
 import Button from "./button";
 import Flexbox from "../containers/flexbox";
-import Icon from "../text/Icon";
+import Icon from "../text/icon";
 
 export default function DropdownButton({
   children,
@@ -12,7 +12,13 @@ export default function DropdownButton({
   outerContainerClassName = "",
 
   buttonContainerStyle = {},
-  defaultButtonContainerStyle = { display: "inline-flex", position: "relative", cursor: "pointer" },
+  defaultButtonContainerStyle = {
+    display: "inline-flex",
+    position: "relative",
+    cursor: "pointer",
+    alignItems: "stretch",
+    zIndex: 1,
+  },
   buttonContainerClassName = "",
 
   onButtonClick,
@@ -27,20 +33,22 @@ export default function DropdownButton({
   dropdownSelectContainerStyle = {},
   defaultDropdownSelectContainerStyle = {
     display: "flex",
-    height: "100%",
+    alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
     padding: "0 0.5rem",
     border: "1px solid #ccc",
     borderLeft: "0",
     borderRadius: "0 4px 4px 0",
+    background: "#f0f0f0",
     backgroundColor: "#f0f0f0",
+    boxSizing: "border-box",
   },
   dropdownSelectContainerClassName = "",
   dropdownIconClosedClassName = "fa fa-caret-down",
   dropdownIconOpenClassName = "fa fa-caret-up",
   dropdownIconStyle = {},
-  defaultDropdownIconStyle = { margin: "0.25rem 0.5rem", fontSize: "1rem" },
+  defaultDropdownIconStyle = { margin: 0, fontSize: "1rem", lineHeight: 1 },
 
   dropdownContainerStyle = {},
   defaultDropdownContainerStyle = {
@@ -54,14 +62,15 @@ export default function DropdownButton({
     borderRadius: "4px",
     cursor: "pointer",
     backgroundColor: "#f0f0f0",
-    color: "#000"
+    color: "#000",
+    zIndex: 1000,
   },
   dropdownContainerClassName = "",
 
   showDropdownOnTop = false,
   dropdownItems = [],
   actionElementStyle = {},
-  defaultActionElementStyle = { padding: "0.25rem 0.5rem", cursor: "pointer" },
+  defaultActionElementStyle = { padding: "0.25rem 0.5rem", cursor: "pointer", backgroundColor: "#f0f0f0" },
   actionElementClassName = "",
   urlElementStyle = {},
   defaultUrlElementStyle = { padding: "0.25rem 0.5rem", cursor: "pointer", textDecoration: "none", color: "inherit" },
@@ -85,8 +94,27 @@ export default function DropdownButton({
   const usedUrlElementStyle = replaceDefaults(defaultUrlElementStyle, urlElementStyle);
 
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+
+  const handleMainButtonClick = (event) => {
+    onButtonClick?.(event);
+  };
+
+  const handleToggleDropdownClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDropdownOpen((prev) => !prev);
+  };
+
+  const handleDropdownActionClick = (event, item) => {
+    event.preventDefault();
+    event.stopPropagation();
+    item?.action?.();
+    setIsDropdownOpen(false);
+  };
+
+  const handleDropdownLinkClick = (event) => {
+    event.stopPropagation();
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -95,7 +123,7 @@ export default function DropdownButton({
         <Button
           className={buttonClassName}
           style={usedButtonStyle}
-          onClick={onButtonClick}
+          onClick={handleMainButtonClick}
           leadingIconClassName={leadingIconClassName}
           leadingIconStyle={leadingIconStyle}
           trailingIconClassName={trailingIconClassName}
@@ -104,7 +132,14 @@ export default function DropdownButton({
           {children}
         </Button>
 
-        <Flexbox className={dropdownSelectContainerClassName} style={usedDropdownSelectContainerStyle} vertical="top" horizontal="left" direction="column" onClick={toggleDropdown}>
+        <Flexbox
+          className={dropdownSelectContainerClassName}
+          style={usedDropdownSelectContainerStyle}
+          vertical="top"
+          horizontal="left"
+          direction="column"
+          onClick={handleToggleDropdownClick}
+        >
           <Icon className={isDropdownOpen ? dropdownIconOpenClassName : dropdownIconClosedClassName} style={usedDropdownIconStyle} />
         </Flexbox>
       </Flexbox>
@@ -113,11 +148,22 @@ export default function DropdownButton({
         <Flexbox className={dropdownContainerClassName} style={usedDropdownContainerStyle} vertical="top" horizontal="left" direction="column">
           {dropdownItems.map((item, index) => (
             item.action ? (
-              <Flexbox key={index} style={usedActionElementStyle} className={actionElementClassName} onClick={() => item.action && item.action()}>
+              <Flexbox
+                key={index}
+                style={usedActionElementStyle}
+                className={actionElementClassName}
+                onClick={(event) => handleDropdownActionClick(event, item)}
+              >
                 {item.title}
               </Flexbox>
             ) : (
-              <a key={index} href={item.url ? item.url : "#"} style={usedUrlElementStyle} className={urlElementClassName}>
+              <a
+                key={index}
+                href={item.url ? item.url : "#"}
+                style={usedUrlElementStyle}
+                className={urlElementClassName}
+                onClick={handleDropdownLinkClick}
+              >
                 {item.title}
               </a>
             )
