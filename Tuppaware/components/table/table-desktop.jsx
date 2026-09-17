@@ -12,6 +12,7 @@ export default function TableDesktop({
   tableStyleObject,
   tableHeadClassName,
   tableHeadStyleObject,
+  tableHeadBackgroundStyle,
   columns,
   tableHeadCellClassName,
   useActionsColumn,
@@ -55,7 +56,7 @@ export default function TableDesktop({
               className={tableHeadCellClassName}
               style={getHeaderStyle(index)}
             >
-              <FlexBox direction="row" horizontal="space-between" onClick={() => onColumnSort(index)} style={{ cursor: "pointer" }}>
+              <FlexBox direction="row" horizontal="space-between" onClick={() => onColumnSort(index)} style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
                 {header.name}
 
                 {header.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}

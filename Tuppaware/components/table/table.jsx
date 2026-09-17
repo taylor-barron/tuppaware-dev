@@ -15,6 +15,7 @@ import {
   getBodyCellStyle as getBodyCellStyleHelper,
   getActionCellStyle as getActionCellStyleHelper,
   ensureRowsHaveOrder,
+  getHeaderBackgroundColor,
   
 } from "./table-service";
 import TableDesktop from "./table-desktop";
@@ -73,6 +74,7 @@ export default function Table({
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
   const tableHeadCellStyleObject = replaceDefaults(defaultTableHeadCellStyle, tableHeadCellStyle);
+  const tableHeadBackgroundStyle = getHeaderBackgroundColor(tableHeadStyleObject);
 
   const rows = useMemo(() => {
     const sourceRows = Array.isArray(rowData)
@@ -199,6 +201,7 @@ export default function Table({
     tableStyleObject,
     tableHeadClassName,
     tableHeadStyleObject,
+    tableHeadBackgroundStyle,
     columns,
     tableHeadCellClassName,
     useActionsColumn,

@@ -361,3 +361,7 @@ export function updateColumns(columns = [], columnIndex) {
     }
   });
 }
+
+export function getHeaderBackgroundColor(tableHeadStyleObject) {
+  return tableHeadStyleObject?.backgroundColor || "transparent";
+}
