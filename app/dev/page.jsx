@@ -12,6 +12,7 @@ import Table from '../../Tuppaware/components/table/table';
 import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
+import Modal from '../../Tuppaware/modals/modal';
 
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
@@ -61,6 +62,16 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
+
+        <Modal
+          isOpen={true}
+          headerText="Example Modal"
+          useCloseIcon={true}
+          onClose={() => { console.log("Modal closed"); }}
+        >
+          <p>This is the content of the modal.</p>
+        </Modal>
+
         {/* need to do sorting */}
         {/* need to set up icons for sorting */}
         {/* need to test no button */}
