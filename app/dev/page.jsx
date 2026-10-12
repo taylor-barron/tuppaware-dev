@@ -13,25 +13,31 @@ import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
 import Modal from '../../Tuppaware/modals/modal';
+import Codeblock from '../../Tuppaware/components/codeblock';
 
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
 export default function DevContainer() {
   const [columns, setColumns] = useState([
-    { name: "Name", length: 150 },
-    { name: "Age" },
-    { name: "Location" },
+    { name: "Name", mapto: "name", length: 150, index: 0 },
+    { name: "Age", mapto: "age", index: 1 },
+    { name: "Location", mapto: "location", index: 2 },
   ]);
 
   const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
 
   const [rows, setRows] = useState([
-    { data: ["John Doe", 30, "New York"], selected: true },
-    { data: ["Jane Smith", 25, "Los Angeles"], selected: false },
-    { data: ["Sam Johnson", 35, "Chicago"], selected: false },
-    { data: ["Emily Davis", 28, "Houston"], selected: false },
-    { data: ["Michael Brown", 32, "Phoenix"], selected: false },
+    { data: { name: "John Doe", age: 30, location: "New York" }, selected: true },
+    { data: { name: "Jane Smith", age: 25, location: "Los Angeles" }, selected: false },
+    { data: { name: "Sam Johnson", age: 35, location: "Chicago" }, selected: false },
+    { data: { name: "Emily Davis", age: 28, location: "Houston" }, selected: false },
+    { data: { name: "Michael Brown", age: 32, location: "Phoenix" }, selected: false },
   ]);
+
+  // const [code, setCode] = useState(
+  //   'curl https://api.example.com/v1/{{resource}} \\\n  -H "Authorization: Bearer {{apiKey}}"'
+  // );
+  // const [values, setValues] = useState({ resource: "users" });
 
   return (
     <>
@@ -63,8 +69,20 @@ export default function DevContainer() {
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
 
+        {/* <CodeBlock
+          title="Request"
+          code={code}
+          onCodeChange={setCode}
+          editable
+          values={values}
+          onValuesChange={setValues}
+          inputs={{ apiKey: { placeholder: "API key" } }}
+          actions={["copy", { label: "Run", onClick: ({ resolvedCode }) => run(resolvedCode) }]}
+          headerStyle={{ backgroundColor: "#ddd" }}
+        /> */}
+
         <Modal
-          isOpen={true}
+          isOpen={false}
           headerText="Example Modal"
           useCloseIcon={true}
           onClose={() => { console.log("Modal closed"); }}
@@ -80,9 +98,8 @@ export default function DevContainer() {
           tableStyle={{ margin: "5rem", width: "90%" }}
           columns={columns}
           actionColumn={actionColumn}
-          onColumnsChange={({ columns: nextColumns, actionColumn: nextActionColumn }) => {
+          onColumnsChange={({ columns: nextColumns }) => {
             setColumns(nextColumns);
-            setActionColumn(nextActionColumn);
           }}
 
           onColumnSort={(columnIndex) => {
@@ -159,7 +176,7 @@ export default function DevContainer() {
           }}
         />
 
-        <Button onClick={() => alert('Button clicked!')} leadingIconClassName='fa fa-check'>Click Me</Button>
+        <Button onClick={() => alert(columns ? JSON.stringify(columns) : "No columns")} leadingIconClassName='fa fa-check'>Click Me</Button>
 
         <DropdownButton onButtonClick={() => alert('Dropdown Button clicked!')} dropdownItems={[
           { title: "Option 1 and like a whole lot of other stuff", action: () => alert("Option 1 clicked") },

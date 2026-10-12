@@ -109,12 +109,11 @@ export default function TableDesktop({
                 action: typeof item?.action === "function" ? () => item.action(row, rowIndex) : item?.action,
               }))
             : [];
-
           return (
             <tr key={rowIndex} style={rowStyle} onClick={() => handleRowClick(row, rowIndex)}>
-              {cells.map((cell, cellIndex) => (
+              {columns.map((column, cellIndex) => (
                 <td key={cellIndex} style={getBodyCellStyle(cellIndex)}>
-                  {renderCellValue(cell)}
+                  {renderCellValue(row?.data?.[column.mapto])}
                 </td>
               ))}
 

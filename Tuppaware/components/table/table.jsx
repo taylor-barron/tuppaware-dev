@@ -49,6 +49,7 @@ export default function Table({
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
+  columnSelectIconClass = "fa fa-check",
 
   rowData = [],
   rowOrderKey = "order",
@@ -69,7 +70,8 @@ export default function Table({
   onRowClick = NOOP,
 
 }) {
-  const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
+  // const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
+  const shouldBeMobile = true; // restore above later
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
@@ -223,11 +225,18 @@ export default function Table({
     useActionButton,
     actionButtonData,
     onColumnSort,
+    onColumnsChange,
+    sortAscendingIcon,
+    sortDescendingIcon,
+    unsortedIcon,
   };
 
   return (
     shouldBeMobile ? 
-    <TableMobile {...commonProps} />
+    <TableMobile
+      {...commonProps}
+      columnSelectIconClass={columnSelectIconClass}
+    />
     : (
     <TableDesktop
       {...commonProps}
@@ -235,9 +244,6 @@ export default function Table({
       totalColumns={totalColumns}
       getHeaderStyle={getHeaderStyle}
       startResize={startResize}
-      sortDescendingIcon={sortDescendingIcon}
-      sortAscendingIcon={sortAscendingIcon}
-      unsortedIcon={unsortedIcon}
     />
   ));
 }
