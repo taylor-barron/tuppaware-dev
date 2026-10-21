@@ -13,8 +13,7 @@ import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
 import Modal from '../../Tuppaware/modals/modal';
-
-import OverlayModal from '../../Tuppaware/modals/overlaymodal';
+import VerticalList from '../../Tuppaware/components/list/verticallist';
 
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
@@ -65,9 +64,10 @@ export default function DevContainer() {
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
 
-        <OverlayModal isOpen={true}>
-          <p>This is the content of the overlay modal.</p>
-        </OverlayModal>
+        <VerticalList
+          listItems={[{ name: "Item 1" }, { name: "Item 2" }, { name: "Item 3" }]}
+          onSelection={(item) => { console.log(`Selected: ${item.name}`); }}
+        />
 
         <Modal
           isOpen={false}
