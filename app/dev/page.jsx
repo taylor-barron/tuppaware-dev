@@ -14,6 +14,8 @@ import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
 import Modal from '../../Tuppaware/modals/modal';
 
+import Overlay from '../../Tuppaware/components/overlay';
+
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
 export default function DevContainer() {
@@ -62,6 +64,10 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
+
+        <Overlay isOpen={true}>
+          <p>This is an overlay content.</p>
+        </Overlay>
 
         <Modal
           isOpen={false}
