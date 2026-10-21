@@ -13,7 +13,6 @@ import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
 import Modal from '../../Tuppaware/modals/modal';
-import Codeblock from '../../Tuppaware/components/codeblock';
 
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
@@ -33,11 +32,6 @@ export default function DevContainer() {
     { data: { name: "Emily Davis", age: 28, location: "Houston" }, selected: false },
     { data: { name: "Michael Brown", age: 32, location: "Phoenix" }, selected: false },
   ]);
-
-  // const [code, setCode] = useState(
-  //   'curl https://api.example.com/v1/{{resource}} \\\n  -H "Authorization: Bearer {{apiKey}}"'
-  // );
-  // const [values, setValues] = useState({ resource: "users" });
 
   return (
     <>
@@ -68,18 +62,6 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
-
-        {/* <CodeBlock
-          title="Request"
-          code={code}
-          onCodeChange={setCode}
-          editable
-          values={values}
-          onValuesChange={setValues}
-          inputs={{ apiKey: { placeholder: "API key" } }}
-          actions={["copy", { label: "Run", onClick: ({ resolvedCode }) => run(resolvedCode) }]}
-          headerStyle={{ backgroundColor: "#ddd" }}
-        /> */}
 
         <Modal
           isOpen={false}

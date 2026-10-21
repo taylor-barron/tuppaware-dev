@@ -1,11 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
 import Button from "../../buttons/button";
 import DropdownButton from "../../buttons/dropdownbutton";
 import FlexBox from "../../containers/flexbox";
 import Icon from "../../text/icon";
+import Modal from "../../modals/modal";
 import { renderCellValue, selectColumns } from "./table-service";
 
 export default function TableMobile({
@@ -57,6 +58,12 @@ export default function TableMobile({
     }
   }, [normalizedColumns, columns, onColumnsChange]);
 
+  const [showModal, setShowModal] = useState(false);
+
+  const columnSelect = () => {
+    setShowModal(true);
+  };
+
   return (
     <>
       <table
@@ -68,15 +75,18 @@ export default function TableMobile({
             {columns.map((column, columnIndex) => column.selected ? (
               <th key={columnIndex} className={tableHeadCellClassName}>
                 <FlexBox direction="row" horizontal="space-between" style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
-                  {column.name}
+                  <FlexBox direction="row" horizontal="space-between" vertical="center">
+                    <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect()}} />
 
-                  <FlexBox direction="row" horizontal="space-between" vertical="center"></FlexBox>
-                    <Icon className={columnSelectIconClass} />
+                    {column.name}
+                  </FlexBox>
 
+                  <FlexBox direction="row" horizontal="space-between" vertical="center">
                     {column.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}
                     {column.sort === SORT_DESC && <Icon className={sortDescendingIcon} />}
                     {(column.sort === SORT_NONE || column.sort == null || column.sort === undefined) && <Icon className={unsortedIcon} />}
                   </FlexBox>
+                </FlexBox>
               </th>
             ) : null)}
           </tr>
@@ -108,6 +118,29 @@ export default function TableMobile({
       </table>
 
       {/* put modal for column selection */}
+      {showModal && (
+        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+          <div>
+            <h3>Select Columns</h3>
+            {normalizedColumns.map((column, index) => (
+              <div key={index}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={column.selected}
+                    onChange={() => {
+                      const updatedColumns = [...normalizedColumns];
+                      updatedColumns[index].selected = !updatedColumns[index].selected;
+                      onColumnsChange?.({ columns: updatedColumns });
+                    }}
+                  />
+                  {column.name}
+                </label>
+              </div>
+            ))}
+          </div>
+        </Modal>
+      )}
     </>
   );
 }

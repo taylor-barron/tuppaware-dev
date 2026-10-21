@@ -49,7 +49,7 @@ export default function Table({
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
-  columnSelectIconClass = "fa fa-check",
+  columnSelectIconClass = "fa fa-bars",
 
   rowData = [],
   rowOrderKey = "order",
