@@ -5,6 +5,7 @@ import Flexbox from "../containers/flexbox";
 
 export default function Overlay({
   isOpen = false,
+  onClick = () => {},
 
   overlayStyle = {},
   defaultOverlayStyle = {
@@ -15,18 +16,26 @@ export default function Overlay({
     height: "100%",
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    zIndex: 1000,
+    cursor: "pointer"
   },
 
   children,
 
 }) {
-  const combinedOverlayStyle = replaceDefaults(overlayStyle, defaultOverlayStyle);
+  const combinedOverlayStyle = replaceDefaults(defaultOverlayStyle, overlayStyle);
 
   if (!isOpen) return null;
 
   return (
-    <Flexbox direction="column" style={combinedOverlayStyle}>
+    <Flexbox
+      direction="column"
+      style={combinedOverlayStyle}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClick(event);
+      }}
+    >
       {children}
     </Flexbox>
   );

@@ -28,7 +28,7 @@ export default function Modal({
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    zIndex: 1000,
+    zIndex: 1050,
     backgroundColor: "#fff",
     borderRadius: "8px",
     padding: "1rem 1rem",
