@@ -22,16 +22,17 @@ export default function DevContainer() {
     { name: "Name", mapto: "name", length: 150, index: 0 },
     { name: "Age", mapto: "age", index: 1 },
     { name: "Location", mapto: "location", index: 2 },
+    { name: "Email", mapto: "email", index: 3 },
   ]);
 
   const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
 
   const [rows, setRows] = useState([
-    { data: { name: "John Doe", age: 30, location: "New York" }, selected: true },
-    { data: { name: "Jane Smith", age: 25, location: "Los Angeles" }, selected: false },
-    { data: { name: "Sam Johnson", age: 35, location: "Chicago" }, selected: false },
-    { data: { name: "Emily Davis", age: 28, location: "Houston" }, selected: false },
-    { data: { name: "Michael Brown", age: 32, location: "Phoenix" }, selected: false },
+    { data: { name: "John Doe", age: 30, location: "New York", email: "john@example.com" }, selected: true },
+    { data: { name: "Jane Smith", age: 25, location: "Los Angeles", email: "jane@example.com" }, selected: false },
+    { data: { name: "Sam Johnson", age: 35, location: "Chicago", email: "sam@example.com" }, selected: false },
+    { data: { name: "Emily Davis", age: 28, location: "Houston", email: "emily@example.com" }, selected: false },
+    { data: { name: "Michael Brown", age: 32, location: "Phoenix", email: "michael@example.com" }, selected: false },
   ]);
 
   return (

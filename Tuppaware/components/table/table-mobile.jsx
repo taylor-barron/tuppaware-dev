@@ -8,6 +8,8 @@ import FlexBox from "../../containers/flexbox";
 import Icon from "../../text/icon";
 import Modal from "../../modals/modal";
 import { renderCellValue, selectColumns } from "./table-service";
+import OverlayModal from "../../modals/overlaymodal";
+import VerticalList from "../list/verticallist";
 
 export default function TableMobile({
   tableClassName,
@@ -59,10 +61,37 @@ export default function TableMobile({
   }, [normalizedColumns, columns, onColumnsChange]);
 
   const [showModal, setShowModal] = useState(false);
+  const [listItems, setListItems] = useState([]);
+  const [replaceMapTo, setReplaceMapTo] = useState(null);
 
-  const columnSelect = () => {
+  const buildListItems = () => {
+    const items = columns
+      .filter(column => !column.selected)
+      .map(column => ({ name: column.name, mapto: column.mapto }));
+    setListItems(items);
+  };
+
+  const columnSelect = (mapTo) => {
+    setReplaceMapTo(mapTo);
+    buildListItems();
     setShowModal(true);
   };
+
+  const handleSelection = (selectedItem) => {
+    if (!replaceMapTo || !selectedItem) return;
+
+    const updatedColumns = columns.map((column) => {
+      if (column.mapto === selectedItem.mapto) return { ...column, selected: true };
+      if (column.mapto === replaceMapTo) return { ...column, selected: false };
+      return column;
+    });
+
+    onColumnsChange?.({ columns: updatedColumns });
+    setReplaceMapTo(null);
+    setShowModal(false);
+  };
+
+  // TODO: + icon, action button, styling, testing
 
   return (
     <>
@@ -76,7 +105,7 @@ export default function TableMobile({
               <th key={columnIndex} className={tableHeadCellClassName}>
                 <FlexBox direction="row" horizontal="space-between" style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
                   <FlexBox direction="row" horizontal="space-between" vertical="center">
-                    <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect()}} />
+                    <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(column.mapto)}} />
 
                     {column.name}
                   </FlexBox>
@@ -117,29 +146,13 @@ export default function TableMobile({
         </tbody>
       </table>
 
-      {/* put modal for column selection */}
       {showModal && (
-        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-          <div>
-            <h3>Select Columns</h3>
-            {normalizedColumns.map((column, index) => (
-              <div key={index}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={column.selected}
-                    onChange={() => {
-                      const updatedColumns = [...normalizedColumns];
-                      updatedColumns[index].selected = !updatedColumns[index].selected;
-                      onColumnsChange?.({ columns: updatedColumns });
-                    }}
-                  />
-                  {column.name}
-                </label>
-              </div>
-            ))}
-          </div>
-        </Modal>
+        <OverlayModal isOpen={showModal} onClose={() => setShowModal(false)}>
+          <VerticalList
+            listItems={listItems}
+            onSelection={handleSelection}
+          ></VerticalList>
+        </OverlayModal>
       )}
     </>
   );

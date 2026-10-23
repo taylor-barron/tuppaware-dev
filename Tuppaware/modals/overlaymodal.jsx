@@ -6,6 +6,7 @@ import Modal from "./modal";
 
 export default function OverlayModal({
   isOpen = false,
+  onClose = () => {},
   children,
 
 }) {
@@ -18,6 +19,7 @@ export default function OverlayModal({
 
   const handleClose = () => {
     setOpen(false);
+    onClose();
   };
 
   return (
