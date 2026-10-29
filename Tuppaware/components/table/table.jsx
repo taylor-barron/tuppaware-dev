@@ -50,6 +50,9 @@ export default function Table({
   tableHeadCellStyle = {},
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
   columnSelectIconClass = "fa fa-bars",
+  columnAddIconClass = "fa fa-plus",
+  addColumnIconContainerStyle = { maxWidth: "20px" },
+  maxMobileColumns = 3,
 
   rowData = [],
   rowOrderKey = "order",
@@ -236,6 +239,9 @@ export default function Table({
     <TableMobile
       {...commonProps}
       columnSelectIconClass={columnSelectIconClass}
+      addColumnIconContainerStyle={addColumnIconContainerStyle}
+      columnAddIconClass={columnAddIconClass}
+      maxMobileColumns={maxMobileColumns}
     />
     : (
     <TableDesktop

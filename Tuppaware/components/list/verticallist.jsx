@@ -34,21 +34,33 @@ export default function VerticalList({
 
   return (
     <Flexbox style={combinedListStyle}>
-      {listItems.map((item, index) => (
-        <div
-          key={index}
-          onClick={() => onSelection(item)}
-          onMouseEnter={() => setHoveredIndex(index)}
-          onMouseLeave={() => setHoveredIndex(null)}
-          style={
-            hoveredIndex === index
-              ? { ...combinedItemStyle, ...combinedHoverStyle }
-              : combinedItemStyle
-          }
-        >
-          {item.name}
-        </div>
-      ))}
+      {listItems.map((item, index) => {
+        const isHovered = hoveredIndex === index;
+
+        const restingStyle = item.backgroundColor
+          ? { ...combinedItemStyle, backgroundColor: item.backgroundColor }
+          : combinedItemStyle;
+
+        const finalStyle = isHovered
+          ? {
+              ...restingStyle,
+              ...combinedHoverStyle,
+              ...(item.hoverColor ? { backgroundColor: item.hoverColor } : {}),
+            }
+          : restingStyle;
+
+        return (
+          <div
+            key={index}
+            onClick={() => onSelection(item)}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={finalStyle}
+          >
+            {item.name}
+          </div>
+        );
+      })}
     </Flexbox>
   );
 }

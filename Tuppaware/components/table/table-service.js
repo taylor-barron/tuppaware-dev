@@ -369,43 +369,21 @@ export function getHeaderBackgroundColor(tableHeadStyleObject) {
 export function selectColumns(columns = [], selected = null, removed = null) {
   if (!Array.isArray(columns)) return [];
 
-  let selected_count = 0;
-  columns.map((column) => {
-    if (column.selected === true) {
-      selected_count += 1;
+  const selectedCount = columns.filter(
+    (column) => column?.selected === true
+  ).length;
 
-    } else if (column.selected === undefined) {
-      column.selected = false;
+  return columns.map((column, position) => {
+    let isSelected = column?.selected === true;
+
+    if (selected !== null && position === selected) isSelected = true;
+    if (removed !== null && position === removed) isSelected = false;
+
+    // only default when nothing has been selected yet
+    if (selected === null && removed === null && selectedCount === 0) {
+      if (position === 0 || position === 1) isSelected = true;
     }
+
+    return { ...column, selected: isSelected };
   });
-
-  if (selected_count <= 2 && selected != null && removed != null) {
-    return columns.map((column) => {
-      if (selected !== null && column.index === selected) {
-        return { ...column, selected: true };
-      }
-
-      if (removed !== null && column.index === removed) {
-        return { ...column, selected: false };
-      }
-
-      return column;
-    });
-
-  } else if (selected_count < 2) {
-    console.log("Less than 2 columns selected, auto-selecting first two columns.");
-    
-    return columns.map((column, idx) => {
-      console.log(idx, column);
-      if (idx === 0 || (selected_count < 1 && idx === 1)) {
-        return { ...column, selected: true };
-      }
-
-      return { ...column, selected: false };
-    });
-  }
-
-  console.log("Columns after selection:", columns);
-
-  return columns;
 }

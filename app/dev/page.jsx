@@ -84,7 +84,7 @@ export default function DevContainer() {
         {/* need to test no button */}
         {/* need to test default mobile columns and selected mobile columns */}
         <Table
-          tableStyle={{ margin: "5rem", width: "90%" }}
+          tableStyle={{ width: "90%" }}
           columns={columns}
           actionColumn={actionColumn}
           onColumnsChange={({ columns: nextColumns }) => {
