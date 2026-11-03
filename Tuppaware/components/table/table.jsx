@@ -86,7 +86,7 @@ export default function Table({
   onColumnSort = (columnIndex) => {
     const updatedColumns = updateColumns(columns, columnIndex);
     setColumns(updatedColumns);
-    
+
     const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
     const updatedRows = numberRows(reorderedRows);
     setRows(updatedRows);
@@ -94,8 +94,7 @@ export default function Table({
   onRowClick = NOOP,
 
 }) {
-  // const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
-  const shouldBeMobile = true; // restore above later
+  const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);

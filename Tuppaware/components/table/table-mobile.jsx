@@ -132,7 +132,6 @@ export default function TableMobile({
 
   const canAddColumn = showActionColumn ? selectedCount < (maxMobileColumns ?? columns.length) - 1 : selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: debugging(detecting mobile/desktop automatically),
   // TODO: clean up/group variables, throw error for any mapTo == "actionColumn" in columns, write/update tests final testing before finishing table
 
   return (
