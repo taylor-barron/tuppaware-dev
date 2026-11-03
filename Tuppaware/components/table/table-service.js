@@ -4,6 +4,8 @@ export const SORT_ASC = "asc";
 export const SORT_DESC = "desc";
 export const SORT_NONE = "none";
 
+export const ACTION_COLUMN_MAPTO = "actionColumn";
+
 export function useEmitColumnChanges(
   columns,
   actionColumn,
@@ -366,7 +368,7 @@ export function getHeaderBackgroundColor(tableHeadStyleObject) {
   return tableHeadStyleObject?.backgroundColor || "transparent";
 }
 
-export function selectColumns(columns = [], selected = null, removed = null) {
+export function selectColumns(columns = [], actionColumnIncluded = false, selected = null, removed = null) {
   if (!Array.isArray(columns)) return [];
 
   const selectedCount = columns.filter(
@@ -381,9 +383,18 @@ export function selectColumns(columns = [], selected = null, removed = null) {
 
     // only default when nothing has been selected yet
     if (selected === null && removed === null && selectedCount === 0) {
-      if (position === 0 || position === 1) isSelected = true;
+      if (position === 0 || (position === 1 && !actionColumnIncluded)) isSelected = true;
     }
 
     return { ...column, selected: isSelected };
   });
+}
+
+export function computeInitiallyShowActionColumn(useActionsColumn, actionColumn, maxMobileColumns, columns) {
+  if (!useActionsColumn) return false;
+  if (!actionColumn) return false;
+  if (!Array.isArray(columns)) return false;
+
+  const selectedCount = columns.filter((column) => column.selected === true).length;
+  return selectedCount < (maxMobileColumns ?? columns.length);
 }

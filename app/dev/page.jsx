@@ -91,6 +91,10 @@ export default function DevContainer() {
             setColumns(nextColumns);
           }}
 
+          useActionsColumn={true}
+          // useDropdownButton={true}
+          useActionButton={true}
+
           onColumnSort={(columnIndex) => {
             const nextColumns = updateColumns(columns, columnIndex);
             setColumns(nextColumns);
@@ -103,7 +107,6 @@ export default function DevContainer() {
             alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(columns)} clicked: ${JSON.stringify(actionColumn)}`);
           }}
 
-          useDropdownButton={true}
           actionFunction={(rowData, rowIndex) => {
             alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(actionColumn)}`);
           }}

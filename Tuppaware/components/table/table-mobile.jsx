@@ -7,9 +7,10 @@ import DropdownButton from "../../buttons/dropdownbutton";
 import FlexBox from "../../containers/flexbox";
 import Icon from "../../text/icon";
 import Modal from "../../modals/modal";
-import { renderCellValue, selectColumns } from "./table-service";
+import { renderCellValue, selectColumns, computeInitiallyShowActionColumn, ACTION_COLUMN_MAPTO } from "./table-service";
 import OverlayModal from "../../modals/overlaymodal";
 import VerticalList from "../list/verticallist";
+import TableActionButton from "./table-action-button";
 
 export default function TableMobile({
   tableClassName,
@@ -19,6 +20,7 @@ export default function TableMobile({
   columns,
   tableHeadCellClassName,
   useActionsColumn,
+  actionColumn,
   rows,
   selectedRowIndex,
   showSelected,
@@ -48,8 +50,12 @@ export default function TableMobile({
   maxMobileColumns,
 
 }) {
+  const [showActionColumn, setShowActionColumn] = useState(() =>
+    computeInitiallyShowActionColumn(useActionsColumn, actionColumn, maxMobileColumns, columns)
+  );
+
   const normalizedColumns = useMemo(
-    () => selectColumns(columns),
+    () => selectColumns(columns, showActionColumn),
     [columns]
   );
 
@@ -72,16 +78,23 @@ export default function TableMobile({
   const [listItems, setListItems] = useState([]);
   const [replaceMapTo, setReplaceMapTo] = useState(null);
 
-  const buildListItems = (mapTo) => {
+  const buildListItems = (mapTo, actionColumnIncluded) => {
     const items = columns
       .filter(column => !column.selected)
       .map(column => ({ name: column.name, mapto: column.mapto }));
 
+    if (!actionColumnIncluded && useActionsColumn) {
+      items.push({ name: actionColumn.name, mapto: ACTION_COLUMN_MAPTO });
+    }
+
     if (mapTo) {
       const selectedColumn = columns.find(column => column.mapto === mapTo);
       const selectedColumnsCount = columns.filter(column => column.selected === true).length;
-      if (selectedColumn && selectedColumnsCount > 1) { // should not be able to remove last column
+      if (selectedColumn && selectedColumnsCount > 1) { // should not be able to remove last column or reduce to just the action column
         items.push({ name: "Remove " + selectedColumn.name, mapto: "remove", backgroundColor: "#f8d7da", hoverColor: "#f5c6cb" });
+
+      } else if (mapTo === ACTION_COLUMN_MAPTO) {
+        items.push({ name: "Remove " + actionColumn.name, mapto: "remove", backgroundColor: "#f8d7da", hoverColor: "#f5c6cb" });
       }
     }
 
@@ -90,12 +103,20 @@ export default function TableMobile({
 
   const columnSelect = (mapTo) => {
     setReplaceMapTo(mapTo);
-    buildListItems(mapTo);
+    buildListItems(mapTo, showActionColumn);
     setShowModal(true);
   };
 
   const handleSelection = (selectedItem) => {
     if (!selectedItem) return;
+
+    if (selectedItem.mapto === ACTION_COLUMN_MAPTO) {
+      setShowActionColumn(true);
+    }
+
+    if (replaceMapTo === ACTION_COLUMN_MAPTO) {
+      setShowActionColumn(false);
+    }
 
     const updatedColumns = columns.map((column) => {
       if (column.mapto === selectedItem.mapto) return { ...column, selected: true };
@@ -110,7 +131,7 @@ export default function TableMobile({
 
   const canAddColumn = selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: action button, styling, testing, clean up/group variables
+  // TODO: action button, styling, testing, clean up/group variables, throw error for any mapTo == "actionColumn"
 
   return (
     <>
@@ -138,11 +159,27 @@ export default function TableMobile({
                   </FlexBox>
                 </th>
               ) : null)}
+
+              {showActionColumn && (
+                <th className={tableHeadCellClassName}>
+                  <FlexBox direction="row" horizontal="space-between" vertical="center">
+                    <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(ACTION_COLUMN_MAPTO)}} />
+
+                    {actionColumn.name}
+                  </FlexBox>
+                </th>
+              )}
             </tr>
           </thead>
 
           <tbody>
-            {rows.map((row, rowIndex) => (
+            {rows.map((row, rowIndex) => {
+              const rowDropdownItems = (dropdownButtonData?.dropdownItems ?? []).map((item) => ({
+                ...item,
+                action: item.action ? () => item.action(row, rowIndex) : undefined,
+              }));
+
+              return (
               <tr
                 key={rowIndex}
                 style={
@@ -161,8 +198,22 @@ export default function TableMobile({
                     </td>
                   ) : null
                 )}
+
+                <TableActionButton
+                  isVisible={showActionColumn}
+                  columns={columns}
+                  getActionCellStyle={getActionCellStyle}
+                  useDropdownButton={useDropdownButton}
+                  dropdownButtonData={dropdownButtonData}
+                  rowDropdownItems={rowDropdownItems}
+                  useActionButton={useActionButton}
+                  actionButtonData={actionButtonData}
+                  row={row}
+                  rowIndex={rowIndex}
+                />
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
 

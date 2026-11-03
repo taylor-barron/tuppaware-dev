@@ -28,7 +28,7 @@ export default function Table({
   mobileBreakPoint = 768,
   showSelected = true,
 
-  useActionsColumn = true,
+  useActionsColumn = false,
   actionColWidth = 140,
   actionColumn = { name: "Actions" },
   

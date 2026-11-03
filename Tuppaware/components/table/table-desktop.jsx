@@ -6,6 +6,7 @@ import DropdownButton from "../../buttons/dropdownbutton";
 import { renderCellValue } from "./table-service";
 import FlexBox from "../../containers/flexbox";
 import Icon from "../../text/icon";
+import TableActionButton from "./table-action-button";
 
 export default function TableDesktop({
   tableClassName,
@@ -117,55 +118,18 @@ export default function TableDesktop({
                 </td>
               ))}
 
-              {useActionsColumn && (
-                <td style={getActionCellStyle(columns.length)}>
-                  {useDropdownButton ? (
-                    <DropdownButton
-                      outerContainerStyle={dropdownButtonData.outerContainerStyle}
-                      outerContainerClassName={dropdownButtonData.outerContainerClassName}
-                      buttonContainerStyle={dropdownButtonData.buttonContainerStyle}
-                      buttonContainerClassName={dropdownButtonData.buttonContainerClassName}
-                      onButtonClick={(e) => {
-                        e.stopPropagation();
-                        dropdownButtonData.onButtonClick?.(row, rowIndex);
-                      }}
-                      buttonClassName={dropdownButtonData.buttonClassName}
-                      buttonStyle={dropdownButtonData.buttonStyle}
-                      leadingIconClassName={dropdownButtonData.leadingIconClassName}
-                      leadingIconStyle={dropdownButtonData.leadingIconStyle}
-                      trailingIconClassName={dropdownButtonData.trailingIconClassName}
-                      trailingIconStyle={dropdownButtonData.trailingIconStyle}
-                      dropdownContainerStyle={dropdownButtonData.dropdownContainerStyle}
-                      dropdownContainerClassName={dropdownButtonData.dropdownContainerClassName}
-                      dropdownIconStyle={dropdownButtonData.dropdownIconStyle}
-                      showDropdown={dropdownButtonData.showDropdown}
-                      bottomRowsToShowUpwardsDropdown={dropdownButtonData.bottomRowsToShowUpwardsDropdown}
-                      dropdownItems={rowDropdownItems}
-                      actionElementStyle={dropdownButtonData.actionElementStyle}
-                      actionElementClassName={dropdownButtonData.actionElementClassName}
-                      urlElementStyle={dropdownButtonData.urlElementStyle}
-                      urlElementClassName={dropdownButtonData.urlElementClassName}
-                    >
-                      {dropdownButtonData.text}
-                    </DropdownButton>
-                  ) : useActionButton ? (
-                    <Button
-                      style={actionButtonData.style}
-                      className={actionButtonData.className}
-                      leadingIconClassName={actionButtonData.leadingIconClassName}
-                      leadingIconStyle={actionButtonData.leadingIconStyle}
-                      trailingIconClassName={actionButtonData.trailingIconClassName}
-                      trailingIconStyle={actionButtonData.trailingIconStyle}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        actionButtonData.onButtonClick?.(row, rowIndex);
-                      }}
-                    >
-                      {actionButtonData.text}
-                    </Button>
-                  ) : null}
-                </td>
-              )}
+              <TableActionButton
+                isVisible={useActionsColumn}
+                columns={columns}
+                getActionCellStyle={getActionCellStyle}
+                useDropdownButton={useDropdownButton}
+                dropdownButtonData={dropdownButtonData}
+                rowDropdownItems={rowDropdownItems}
+                useActionButton={useActionButton}
+                actionButtonData={actionButtonData}
+                row={row}
+                rowIndex={rowIndex}
+              />
             </tr>
           );
         })}
