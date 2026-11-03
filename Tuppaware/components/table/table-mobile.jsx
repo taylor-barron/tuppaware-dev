@@ -131,7 +131,7 @@ export default function TableMobile({
 
   const canAddColumn = selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: action button, styling, testing, clean up/group variables, throw error for any mapTo == "actionColumn"
+  // TODO: styling (header color, action button gap, + icon, every other row color, clicked row color), testing, clean up/group variables, throw error for any mapTo == "actionColumn" in columns, final testing before finishing table
 
   return (
     <>
@@ -145,13 +145,13 @@ export default function TableMobile({
               {columns.map((column, columnIndex) => column.selected ? (
                 <th key={columnIndex} className={tableHeadCellClassName}>
                   <FlexBox direction="row" horizontal="space-between" style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
-                    <FlexBox direction="row" horizontal="space-between" vertical="center">
+                    <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle}}>
                       <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(column.mapto)}} />
 
                       {column.name}
                     </FlexBox>
 
-                    <FlexBox direction="row" horizontal="space-between" vertical="center">
+                    <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
                       {column.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}
                       {column.sort === SORT_DESC && <Icon className={sortDescendingIcon} />}
                       {(column.sort === SORT_NONE || column.sort == null || column.sort === undefined) && <Icon className={unsortedIcon} />}
@@ -162,7 +162,7 @@ export default function TableMobile({
 
               {showActionColumn && (
                 <th className={tableHeadCellClassName}>
-                  <FlexBox direction="row" horizontal="space-between" vertical="center">
+                  <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
                     <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(ACTION_COLUMN_MAPTO)}} />
 
                     {actionColumn.name}
