@@ -39,6 +39,7 @@ export default function TableMobile({
   actionButtonData,
   getHeaderStyle,
   onColumnSort,
+  addColumnIconStyle,
   tableHeadBackgroundStyle,
   columnSelectIconClass,
   onColumnsChange,
@@ -131,7 +132,8 @@ export default function TableMobile({
 
   const canAddColumn = selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: styling (header color, action button gap, + icon, every other row color, clicked row color), testing, clean up/group variables, throw error for any mapTo == "actionColumn" in columns, final testing before finishing table
+  // TODO: styling (every other row color, clicked row color, font)
+  // TODO: testing(max columns not counting action column), clean up/group variables, throw error for any mapTo == "actionColumn" in columns, final testing before finishing table
 
   return (
     <>
@@ -162,8 +164,8 @@ export default function TableMobile({
 
               {showActionColumn && (
                 <th className={tableHeadCellClassName}>
-                  <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
-                    <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(ACTION_COLUMN_MAPTO)}} />
+                  <FlexBox direction="row" horizontal="left" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
+                    <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => columnSelect(ACTION_COLUMN_MAPTO)}/>
 
                     {actionColumn.name}
                   </FlexBox>
@@ -219,7 +221,7 @@ export default function TableMobile({
 
         {canAddColumn && (
           <FlexBox direction="row" horizontal="space-between" vertical="center" style={addColumnIconContainerStyle} onClick={() => columnSelect(null)}>
-            <Icon className={columnAddIconClass} />
+            <Icon className={columnAddIconClass} style={addColumnIconStyle} />
           </FlexBox>
         )}
       </FlexBox>

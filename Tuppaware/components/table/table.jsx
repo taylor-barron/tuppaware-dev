@@ -51,7 +51,16 @@ export default function Table({
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
   columnSelectIconClass = "fa fa-bars",
   columnAddIconClass = "fa fa-plus",
-  addColumnIconContainerStyle = { maxWidth: "20px" },
+  defaultAddColumnIconStyle = {},
+  addColumnIconStyle = {},
+  addColumnIconContainerStyle = {},
+  defaultAddColumnIconContainerStyle = {
+    borderRadius: "0 8px 8px 0",
+    padding: "6px 4px",
+    cursor: "pointer",
+    alignSelf: "flex-start",
+    backgroundColor: "#f2f2f2",
+  },
   maxMobileColumns = 3,
 
   rowData = [],
@@ -79,6 +88,8 @@ export default function Table({
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
   const tableHeadCellStyleObject = replaceDefaults(defaultTableHeadCellStyle, tableHeadCellStyle);
+  const addColumnIconStyleObject = replaceDefaults(defaultAddColumnIconStyle, addColumnIconStyle);
+  const addColumnIconContainerStyleObject = replaceDefaults(defaultAddColumnIconContainerStyle, addColumnIconContainerStyle);
   const tableHeadBackgroundStyle = getHeaderBackgroundColor(tableHeadStyleObject);
 
   const rows = useMemo(() => {
@@ -239,9 +250,10 @@ export default function Table({
     <TableMobile
       {...commonProps}
       columnSelectIconClass={columnSelectIconClass}
-      addColumnIconContainerStyle={addColumnIconContainerStyle}
+      addColumnIconContainerStyle={addColumnIconContainerStyleObject}
       columnAddIconClass={columnAddIconClass}
       maxMobileColumns={maxMobileColumns}
+      addColumnIconStyle={addColumnIconStyleObject}
     />
     : (
     <TableDesktop
