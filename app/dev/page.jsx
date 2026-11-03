@@ -28,7 +28,7 @@ export default function DevContainer() {
   const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
 
   const [rows, setRows] = useState([
-    { data: { name: "John Doe", age: 30, location: "New York", email: "john@example.com" }, selected: true },
+    { data: { name: "John Doe", age: 30, location: "New York", email: "john@example.com" }, selected: false },
     { data: { name: "Jane Smith", age: 25, location: "Los Angeles", email: "jane@example.com" }, selected: false },
     { data: { name: "Sam Johnson", age: 35, location: "Chicago", email: "sam@example.com" }, selected: false },
     { data: { name: "Emily Davis", age: 28, location: "Houston", email: "emily@example.com" }, selected: false },

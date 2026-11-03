@@ -7,6 +7,7 @@ export default function TableActionButton({
   isVisible,
   columns,
   getActionCellStyle,
+  rowBackground,
   useDropdownButton,
   dropdownButtonData,
   rowDropdownItems,
@@ -19,7 +20,12 @@ export default function TableActionButton({
   if (!isVisible) return null;
 
   return (
-    <td style={getActionCellStyle(columns.length)}>
+    <td
+      style={{
+        ...getActionCellStyle(columns.length),
+        ...(rowBackground != null && { backgroundColor: rowBackground }),
+      }}
+    >
       {useDropdownButton ? (
         <DropdownButton
           outerContainerStyle={dropdownButtonData.outerContainerStyle}

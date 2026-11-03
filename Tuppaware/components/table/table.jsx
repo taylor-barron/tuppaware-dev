@@ -107,6 +107,8 @@ export default function Table({
     return i >= 0 ? i : null;
   });
 
+  const [pendingRowClick, setPendingRowClick] = useState(null);
+
   const totalColumns = columns.length + (useActionsColumn ? 1 : 0);
   const [columnWidths, setColumnWidths] = useState([]);
   const headerRefs = useRef([]);
@@ -192,10 +194,36 @@ export default function Table({
 
   const handleRowClick = useCallback(
     (row, rowIndex) => {
-      handleRowClickHelper(row, rowIndex, writeable, showSelected, setSelectedRowIndex, onRowClick);
+      handleRowClickHelper(
+        row,
+        rowIndex,
+        writeable,
+        showSelected,
+        setSelectedRowIndex,
+        (clickedRow, clickedRowIndex) => {
+          setPendingRowClick({ row: clickedRow, rowIndex: clickedRowIndex });
+        }
+      );
     },
-    [writeable, showSelected, onRowClick]
+    [writeable, showSelected]
   );
+
+  useEffect(() => {
+    if (!pendingRowClick) return;
+
+    let secondFrame;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        onRowClick(pendingRowClick.row, pendingRowClick.rowIndex);
+        setPendingRowClick(null);
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+    };
+  }, [pendingRowClick, onRowClick]);
 
   const getHeaderStyle = useCallback(
     (index) => getHeaderStyleHelper(index, tableHeadCellStyleObject, columnWidths, totalColumns),

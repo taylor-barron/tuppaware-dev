@@ -132,8 +132,7 @@ export default function TableMobile({
 
   const canAddColumn = selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: styling (every other row color, clicked row color)
-  // TODO: testing(max columns not counting action column, detecting mobile/desktop automatically),
+  // TODO: testing(max columns not counting action column, mobile sorting does not work, detecting mobile/desktop automatically),
   // TODO: clean up/group variables, throw error for any mapTo == "actionColumn" in columns, final testing before finishing table
 
   return (
@@ -177,44 +176,53 @@ export default function TableMobile({
 
           <tbody>
             {rows.map((row, rowIndex) => {
+              const rowStyle = showSelected && selectedRowIndex === rowIndex
+                ? { ...defaultSelectedRowStyle, ...selectedRowStyle }
+                : rowIndex % 2 === 0
+                  ? { ...defaultEvenRowStyle, ...evenRowStyle }
+                  : { ...defaultOddRowStyle, ...oddRowStyle };
+
+              const rowBackground = rowStyle.backgroundColor;
+
               const rowDropdownItems = (dropdownButtonData?.dropdownItems ?? []).map((item) => ({
                 ...item,
                 action: item.action ? () => item.action(row, rowIndex) : undefined,
               }));
 
               return (
-              <tr
-                key={rowIndex}
-                style={
-                  showSelected && selectedRowIndex === rowIndex
-                    ? selectedRowStyle || defaultSelectedRowStyle
-                    : rowIndex % 2 === 0
-                    ? evenRowStyle || defaultEvenRowStyle
-                    : oddRowStyle || defaultOddRowStyle
-                }
-                onClick={() => handleRowClick?.(row, rowIndex)}
-              >
-                {columns.map((column, columnIndex) =>
-                  column.selected ? (
-                    <td key={columnIndex} style={getBodyCellStyle?.(columnIndex)}>
-                      {renderCellValue(row?.data?.[column.mapto])}
-                    </td>
-                  ) : null
-                )}
+                <tr
+                  key={rowIndex}
+                  style={rowStyle}
+                  onClick={() => handleRowClick?.(row, rowIndex)}
+                >
+                  {columns.map((column, columnIndex) =>
+                    column.selected ? (
+                      <td
+                        key={columnIndex}
+                        style={{
+                          ...getBodyCellStyle?.(columnIndex),
+                          ...(rowBackground != null && { backgroundColor: rowBackground }),
+                        }}
+                      >
+                        {renderCellValue(row?.data?.[column.mapto])}
+                      </td>
+                    ) : null
+                  )}
 
-                <TableActionButton
-                  isVisible={showActionColumn}
-                  columns={columns}
-                  getActionCellStyle={getActionCellStyle}
-                  useDropdownButton={useDropdownButton}
-                  dropdownButtonData={dropdownButtonData}
-                  rowDropdownItems={rowDropdownItems}
-                  useActionButton={useActionButton}
-                  actionButtonData={actionButtonData}
-                  row={row}
-                  rowIndex={rowIndex}
-                />
-              </tr>
+                  <TableActionButton
+                    isVisible={showActionColumn}
+                    columns={columns}
+                    getActionCellStyle={getActionCellStyle}
+                    rowBackground={rowBackground}
+                    useDropdownButton={useDropdownButton}
+                    dropdownButtonData={dropdownButtonData}
+                    rowDropdownItems={rowDropdownItems}
+                    useActionButton={useActionButton}
+                    actionButtonData={actionButtonData}
+                    row={row}
+                    rowIndex={rowIndex}
+                  />
+                </tr>
               );
             })}
           </tbody>
