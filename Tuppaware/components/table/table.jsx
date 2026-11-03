@@ -16,7 +16,10 @@ import {
   getActionCellStyle as getActionCellStyleHelper,
   ensureRowsHaveOrder,
   getHeaderBackgroundColor,
-  
+  updateColumns,
+  sortRows,
+  numberRows,
+
 } from "./table-service";
 import TableDesktop from "./table-desktop";
 import TableMobile from "./table-mobile";
@@ -46,6 +49,7 @@ export default function Table({
   defaultTableHeadStyle = { backgroundColor: "#f2f2f2", textAlign: "left", fontFamily: "system-ui" },
 
   columns = [],
+  setColumns = NOOP,
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
@@ -64,6 +68,7 @@ export default function Table({
   maxMobileColumns = 3,
 
   rowData = [],
+  setRows,
   rowOrderKey = "order",
   minColWidth = 80,
   oddRowStyle = {},
@@ -78,7 +83,14 @@ export default function Table({
   unsortedIcon = "fa fa-sort",
 
   onColumnsChange = NOOP,
-  onColumnSort = NOOP,
+  onColumnSort = (columnIndex) => {
+    const updatedColumns = updateColumns(columns, columnIndex);
+    setColumns(updatedColumns);
+    
+    const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
+    const updatedRows = numberRows(reorderedRows);
+    setRows(updatedRows);
+  },
   onRowClick = NOOP,
 
 }) {
@@ -267,7 +279,7 @@ export default function Table({
     useActionButton,
     actionButtonData,
     onColumnSort,
-    onColumnsChange,
+    setColumns,
     sortAscendingIcon,
     sortDescendingIcon,
     unsortedIcon,

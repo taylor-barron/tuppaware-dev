@@ -293,7 +293,7 @@ export function ensureRowsHaveOrder(rows = [], rowOrderKey = "order") {
 }
 
 /**
- * not used by default, must be incorporated manually
+ * sort order should go from SORT_NONE -> SORT_ASC -> SORT_DESC -> SORT_NONE
  */
 export function sortRows(rows = [], columns = [], columnIndex) {
   if (!Array.isArray(rows)) return [];
@@ -304,16 +304,20 @@ export function sortRows(rows = [], columns = [], columnIndex) {
     rows = rows.map((row, index) => ({ ...row, originalOrder: index }));
   }
 
+  const mapTo = columns[columnIndex]?.mapto;
+
   const currentSort = columns[columnIndex]?.sort;
-  if (currentSort === SORT_NONE) {
+  if (currentSort == undefined) {
+
+  } else if (currentSort === SORT_NONE) {
     return rows
       .map((row) => ({ ...row, order: row.originalOrder }))
       .sort((a, b) => a.originalOrder - b.originalOrder);
 
   } else if (currentSort === SORT_ASC) {
     return rows.map((row) => ({ ...row })).sort((a, b) => {
-      const aValue = a.data[columnIndex];
-      const bValue = b.data[columnIndex];
+      const aValue = a.data[mapTo];
+      const bValue = b.data[mapTo];
       if (aValue < bValue) return -1;
       if (aValue > bValue) return 1;
       return 0;
@@ -321,8 +325,8 @@ export function sortRows(rows = [], columns = [], columnIndex) {
 
   } else if (currentSort === SORT_DESC) {
     return rows.map((row) => ({ ...row })).sort((a, b) => {
-      const aValue = a.data[columnIndex];
-      const bValue = b.data[columnIndex];
+      const aValue = a.data[mapTo];
+      const bValue = b.data[mapTo];
       if (aValue > bValue) return -1;
       if (aValue < bValue) return 1;
       return 0;
@@ -332,6 +336,18 @@ export function sortRows(rows = [], columns = [], columnIndex) {
     console.error("Unknown sort type:", currentSort);
     return rows.map((row) => ({ ...row }));
   }
+}
+
+export function numberRows(rows = []) {
+  if (!Array.isArray(rows)) return [];
+  
+  let counter = 0;
+  for (let i = 0; i < rows.length; i++) {
+    rows[i].order = counter;
+    counter++;
+  }
+
+  return rows;
 }
 
 /**

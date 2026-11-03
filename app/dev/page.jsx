@@ -86,22 +86,24 @@ export default function DevContainer() {
         <Table
           tableStyle={{ width: "90%" }}
           columns={columns}
+          setColumns={setColumns}
           actionColumn={actionColumn}
-          onColumnsChange={({ columns: nextColumns }) => {
-            setColumns(nextColumns);
-          }}
+          // onColumnsChange={({ columns: nextColumns }) => {
+          //   setColumns(nextColumns);
+          // }}
 
           useActionsColumn={true}
           // useDropdownButton={true}
           useActionButton={true}
 
-          onColumnSort={(columnIndex) => {
-            const nextColumns = updateColumns(columns, columnIndex);
-            setColumns(nextColumns);
-            setRows(sortRows(rows, nextColumns, columnIndex));
-          }}
+          // onColumnSort={(columnIndex) => {
+          //   const nextColumns = updateColumns(columns, columnIndex);
+          //   setColumns(nextColumns);
+          //   setRows(sortRows(rows, nextColumns, columnIndex));
+          // }}
 
           rowData={rows}
+          setRows={setRows}
 
           onRowClick={(rowData, rowIndex) => {
             alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(columns)} clicked: ${JSON.stringify(actionColumn)}`);

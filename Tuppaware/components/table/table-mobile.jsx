@@ -18,6 +18,7 @@ export default function TableMobile({
   tableHeadClassName,
   tableHeadStyleObject,
   columns,
+  setColumns,
   tableHeadCellClassName,
   useActionsColumn,
   actionColumn,
@@ -42,7 +43,6 @@ export default function TableMobile({
   addColumnIconStyle,
   tableHeadBackgroundStyle,
   columnSelectIconClass,
-  onColumnsChange,
   sortAscendingIcon,
   sortDescendingIcon,
   unsortedIcon,
@@ -57,7 +57,7 @@ export default function TableMobile({
 
   const normalizedColumns = useMemo(
     () => selectColumns(columns, showActionColumn),
-    [columns]
+    [columns, showActionColumn]
   );
 
   const selectedCount = useMemo(
@@ -71,9 +71,9 @@ export default function TableMobile({
     );
 
     if (selectionChanged) {
-      onColumnsChange?.({ columns: normalizedColumns });
+      setColumns?.(normalizedColumns);
     }
-  }, [normalizedColumns, columns, onColumnsChange]);
+  }, [normalizedColumns, columns, setColumns]);
 
   const [showModal, setShowModal] = useState(false);
   const [listItems, setListItems] = useState([]);
@@ -125,15 +125,15 @@ export default function TableMobile({
       return column;
     });
 
-    onColumnsChange?.({ columns: updatedColumns });
+    setColumns?.(updatedColumns);
     setReplaceMapTo(null);
     setShowModal(false);
   };
 
   const canAddColumn = showActionColumn ? selectedCount < (maxMobileColumns ?? columns.length) - 1 : selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: testing(max columns not counting action column, mobile sorting does not work, detecting mobile/desktop automatically),
-  // TODO: clean up/group variables, throw error for any mapTo == "actionColumn" in columns, final testing before finishing table
+  // TODO: debugging(detecting mobile/desktop automatically),
+  // TODO: clean up/group variables, throw error for any mapTo == "actionColumn" in columns, write/update tests final testing before finishing table
 
   return (
     <>
@@ -153,7 +153,7 @@ export default function TableMobile({
                       {column.name}
                     </FlexBox>
 
-                    <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
+                    <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }} onClick={() => onColumnSort(columnIndex)}>
                       {column.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}
                       {column.sort === SORT_DESC && <Icon className={sortDescendingIcon} />}
                       {(column.sort === SORT_NONE || column.sort == null || column.sort === undefined) && <Icon className={unsortedIcon} />}
