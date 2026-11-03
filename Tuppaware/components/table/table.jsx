@@ -39,11 +39,11 @@ export default function Table({
 
   tableClassName = "",
   tableStyle = {},
-  defaultTableStyle = { maxWidth: "100%", width: "100%", borderCollapse: "collapse", border: "1px 1px 0 0 solid #ddd" },
+  defaultTableStyle = { maxWidth: "100%", width: "100%", borderCollapse: "collapse", border: "1px 1px 0 0 solid #ddd", fontFamily: "system-ui" },
 
   tableHeadClassName = "",
   tableHeadStyle = {},
-  defaultTableHeadStyle = { backgroundColor: "#f2f2f2", fontWeight: "bold", textAlign: "left" },
+  defaultTableHeadStyle = { backgroundColor: "#f2f2f2", textAlign: "left", fontFamily: "system-ui" },
 
   columns = [],
   tableHeadCellClassName = "",
