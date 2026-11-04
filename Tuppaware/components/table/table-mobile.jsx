@@ -12,43 +12,51 @@ import TableActionButton from "./table-action-button";
 import Text from "../../text/text";
 
 export default function TableMobile({
-  tableClassName,
-  tableStyleObject,
-  tableHeadClassName,
-  tableHeadStyleObject,
-  headerClassName,
-  headerStyleObject,
-  textClassName,
-  textStyleObject,
   columns,
-  setColumns,
-  tableHeadCellClassName,
+  rows,
+  totalColumns,
+
   useActionsColumn,
   actionColumn,
-  rows,
-  selectedRowIndex,
+  useActionButton,
+  actionButtonData,
+  useDropdownButton,
+  dropdownButtonData,
+
+  tableClassName,
+  tableStyleObject,
+
+  tableHeadClassName,
+  tableHeadStyleObject,
+  tableHeadBackgroundStyle,
+  tableHeadCellClassName,
+
+  headerClassName,
+  headerStyleObject,
+
+  textClassName,
+  textStyleObject,
+
   showSelected,
-  defaultSelectedRowStyle,
-  selectedRowStyle,
-  defaultEvenRowStyle,
-  evenRowStyle,
-  defaultOddRowStyle,
-  oddRowStyle,
+  oddRowStyleObject,
+  evenRowStyleObject,
+  selectedRowStyleObject,
+  selectedRowIndex,
+
   handleRowClick,
   getBodyCellStyle,
   getActionCellStyle,
-  useDropdownButton,
-  dropdownButtonData,
-  useActionButton,
-  actionButtonData,
   onColumnSort,
-  addColumnIconStyle,
-  tableHeadBackgroundStyle,
-  columnSelectIconClass,
+  getHeaderStyle,
+
   sortAscendingIcon,
   sortDescendingIcon,
   unsortedIcon,
-  addColumnIconContainerStyle,
+
+  setColumns,
+  columnSelectIconClass,
+  addColumnIconContainerStyleObject,
+  addColumnIconStyleObject,
   columnAddIconClass,
   maxMobileColumns,
 
@@ -144,7 +152,7 @@ export default function TableMobile({
           <thead className={tableHeadClassName} style={tableHeadStyleObject}>
             <tr>
               {columns.map((column, columnIndex) => column.selected ? (
-                <th key={columnIndex} className={tableHeadCellClassName}>
+                <th key={columnIndex} className={tableHeadCellClassName} style={getHeaderStyle(columnIndex)}>
                   <FlexBox direction="row" horizontal="space-between" style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
                     <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle}}>
                       <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(column.mapto)}} />
@@ -162,7 +170,7 @@ export default function TableMobile({
               ) : null)}
 
               {showActionColumn && (
-                <th className={tableHeadCellClassName}>
+                <th className={tableHeadCellClassName} style={getHeaderStyle(totalColumns - 1)}>
                   <FlexBox direction="row" horizontal="left" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
                     <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => columnSelect(ACTION_COLUMN_MAPTO)}/>
 
@@ -176,10 +184,10 @@ export default function TableMobile({
           <tbody>
             {rows.map((row, rowIndex) => {
               const rowStyle = showSelected && selectedRowIndex === rowIndex
-                ? { ...defaultSelectedRowStyle, ...selectedRowStyle }
+                ? { ...selectedRowStyleObject }
                 : rowIndex % 2 === 0
-                  ? { ...defaultEvenRowStyle, ...evenRowStyle }
-                  : { ...defaultOddRowStyle, ...oddRowStyle };
+                  ? { ...evenRowStyleObject }
+                  : { ...oddRowStyleObject };
 
               const rowBackground = rowStyle.backgroundColor;
 
@@ -228,8 +236,8 @@ export default function TableMobile({
         </table>
 
         {canAddColumn && (
-          <FlexBox direction="row" horizontal="space-between" vertical="center" style={addColumnIconContainerStyle} onClick={() => columnSelect(null)}>
-            <Icon className={columnAddIconClass} style={addColumnIconStyle} />
+          <FlexBox direction="row" horizontal="space-between" vertical="center" style={addColumnIconContainerStyleObject} onClick={() => columnSelect(null)}>
+            <Icon className={columnAddIconClass} style={addColumnIconStyleObject} />
           </FlexBox>
         )}
       </FlexBox>

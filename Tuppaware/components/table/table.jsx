@@ -1,8 +1,6 @@
 "use client";
 
-// TODO: find any styling that needs to be moved to the top level for expected control
-// TODO: go through vars, make sure they are useful and grouped well
-// TODO: throw errors for invalid states like true for both buttons or "actionColumn" being used as a mapTo
+// TODO: throw errors for invalid states like true for both buttons or "actionColumn" being used as a mapTo, order key?,
 // TODO: update tests
 // TODO: update documentation
 
@@ -35,7 +33,23 @@ const NOOP = () => {};
 export default function Table({
   writeable = true,
   mobileBreakPoint = 768,
-  showSelected = true,
+
+  columns = [],
+  setColumns = NOOP,
+
+  rowData = [],
+  setRows = NOOP,
+
+  onColumnsChange = NOOP,
+  onColumnSort = (columnIndex) => {
+    const updatedColumns = updateColumns(columns, columnIndex);
+    setColumns(updatedColumns);
+
+    const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
+    const updatedRows = numberRows(reorderedRows);
+    setRows(updatedRows);
+  },
+  onRowClick = NOOP,
 
   useActionsColumn = false,
   actionColWidth = 140,
@@ -61,12 +75,9 @@ export default function Table({
   textStyle = {},
   defaultTextStyle = { fontFamily: "system-ui", margin: 0, fontSize: "inherit", fontWeight: "inherit" },
 
-  columns = [],
-  setColumns = NOOP,
-
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
-  defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
+  defaultTableHeadCellStyle = { margin: 0, paddingLeft: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
 
   columnSelectIconClass = "fa fa-bars",
   columnAddIconClass = "fa fa-plus",
@@ -82,14 +93,14 @@ export default function Table({
   },
   maxMobileColumns = 3,
 
-  rowData = [],
-  setRows,
   rowOrderKey = "order",
   minColWidth = 80,
   cascadeResize = false,
+
+  showSelected = true,
   oddRowStyle = {},
-  defaultOddRowStyle = { backgroundColor: "#ffffff", fontFamily: "system-ui" },
   evenRowStyle = {},
+  defaultOddRowStyle = { backgroundColor: "#ffffff", fontFamily: "system-ui" },
   defaultEvenRowStyle = { backgroundColor: "#f9f9f9", fontFamily: "system-ui" },
   selectedRowStyle = {},
   defaultSelectedRowStyle = { backgroundColor: "#d9edf7", fontFamily: "system-ui" },
@@ -98,19 +109,9 @@ export default function Table({
   sortAscendingIcon = "fa fa-caret-up",
   unsortedIcon = "fa fa-sort",
 
-  onColumnsChange = NOOP,
-  onColumnSort = (columnIndex) => {
-    const updatedColumns = updateColumns(columns, columnIndex);
-    setColumns(updatedColumns);
-
-    const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
-    const updatedRows = numberRows(reorderedRows);
-    setRows(updatedRows);
-  },
-  onRowClick = NOOP,
-
 }) {
   const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
+  // const shouldBeMobile = true;
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
@@ -120,6 +121,9 @@ export default function Table({
   const textStyleObject = replaceDefaults(defaultTextStyle, textStyle);
   const addColumnIconContainerStyleObject = replaceDefaults(defaultAddColumnIconContainerStyle, addColumnIconContainerStyle);
   const tableHeadBackgroundStyle = getHeaderBackgroundColor(tableHeadStyleObject);
+  const oddRowStyleObject = replaceDefaults(defaultOddRowStyle, oddRowStyle);
+  const evenRowStyleObject = replaceDefaults(defaultEvenRowStyle, evenRowStyle);
+  const selectedRowStyleObject = replaceDefaults(defaultSelectedRowStyle, selectedRowStyle);
 
   const rows = useMemo(() => {
     const sourceRows = Array.isArray(rowData)
@@ -270,37 +274,43 @@ export default function Table({
   );
 
   const commonProps = {
+    columns,
+    rows,
+    totalColumns,
+    
+    useActionsColumn,
+    actionColumn,
+    useActionButton,
+    actionButtonData,
+    useDropdownButton,
+    dropdownButtonData,
+
     tableClassName,
     tableStyleObject,
+
     tableHeadClassName,
     tableHeadStyleObject,
     tableHeadBackgroundStyle,
+    tableHeadCellClassName,
+
     headerClassName,
     headerStyleObject,
+
     textClassName,
     textStyleObject,
-    columns,
-    tableHeadCellClassName,
-    useActionsColumn,
-    actionColumn,
-    rows,
-    selectedRowIndex,
+
     showSelected,
-    defaultSelectedRowStyle,
-    selectedRowStyle,
-    defaultEvenRowStyle,
-    evenRowStyle,
-    defaultOddRowStyle,
-    oddRowStyle,
+    oddRowStyleObject,
+    evenRowStyleObject,
+    selectedRowStyleObject,
+    selectedRowIndex,
+    
     handleRowClick,
     getBodyCellStyle,
     getActionCellStyle,
-    useDropdownButton,
-    dropdownButtonData,
-    useActionButton,
-    actionButtonData,
     onColumnSort,
-    setColumns,
+    getHeaderStyle,
+
     sortAscendingIcon,
     sortDescendingIcon,
     unsortedIcon,
@@ -310,18 +320,17 @@ export default function Table({
     shouldBeMobile ? 
       <TableMobile
         {...commonProps}
+        setColumns={setColumns}
         columnSelectIconClass={columnSelectIconClass}
-        addColumnIconContainerStyle={addColumnIconContainerStyleObject}
+        addColumnIconContainerStyleObject={addColumnIconContainerStyleObject}
+        addColumnIconStyleObject={addColumnIconStyleObject}
         columnAddIconClass={columnAddIconClass}
         maxMobileColumns={maxMobileColumns}
-        addColumnIconStyle={addColumnIconStyleObject}
       />
     : (
       <TableDesktop
         {...commonProps}
         headerRefs={headerRefs}
-        totalColumns={totalColumns}
-        getHeaderStyle={getHeaderStyle}
         startResize={startResize}
       />
   ));

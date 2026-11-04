@@ -9,43 +9,49 @@ import TableActionButton from "./table-action-button";
 import Text from "../../text/text";
 
 export default function TableDesktop({
+  columns,
+  rows,
+  
+  useActionsColumn,
+  actionColumn,
+  useActionButton,
+  actionButtonData,
+  useDropdownButton,
+  dropdownButtonData,
+
   tableClassName,
   tableStyleObject,
+  
   tableHeadClassName,
   tableHeadStyleObject,
   tableHeadBackgroundStyle,
+  tableHeadCellClassName,
+  
   headerClassName,
   headerStyleObject,
+
   textClassName,
   textStyleObject,
-  columns,
-  tableHeadCellClassName,
-  useActionsColumn,
-  actionColumn,
-  rows,
-  selectedRowIndex,
+
   showSelected,
-  defaultSelectedRowStyle,
-  selectedRowStyle,
-  defaultEvenRowStyle,
-  evenRowStyle,
-  defaultOddRowStyle,
-  oddRowStyle,
+  oddRowStyleObject,
+  evenRowStyleObject,
+  selectedRowStyleObject,
+  selectedRowIndex,
+
   handleRowClick,
   getBodyCellStyle,
   getActionCellStyle,
-  useDropdownButton,
-  dropdownButtonData,
-  useActionButton,
-  actionButtonData,
+  onColumnSort,
+  
+  sortAscendingIcon,
+  sortDescendingIcon,
+  unsortedIcon,
+
   headerRefs,
   totalColumns,
   getHeaderStyle,
   startResize,
-  onColumnSort,
-  sortDescendingIcon,
-  sortAscendingIcon,
-  unsortedIcon,
 
 }) {
   return (
@@ -102,10 +108,10 @@ export default function TableDesktop({
         {rows.map((row, rowIndex) => {
           const isSelected = showSelected ? rowIndex === selectedRowIndex : false;
           const rowStyle = isSelected
-            ? { ...defaultSelectedRowStyle, ...selectedRowStyle }
+            ? { ...selectedRowStyleObject }
             : rowIndex % 2 === 0
-              ? { ...defaultEvenRowStyle, ...evenRowStyle }
-              : { ...defaultOddRowStyle, ...oddRowStyle };
+              ? { ...evenRowStyleObject }
+              : { ...oddRowStyleObject };
 
           const rowDropdownItems = Array.isArray(dropdownButtonData.dropdownItems)
             ? dropdownButtonData.dropdownItems.map((item) => ({
