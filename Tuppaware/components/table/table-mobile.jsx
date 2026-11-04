@@ -9,6 +9,7 @@ import { renderCellValue, selectColumns, computeInitiallyShowActionColumn, ACTIO
 import OverlayModal from "../../modals/overlaymodal";
 import VerticalList from "../list/verticallist";
 import TableActionButton from "./table-action-button";
+import Text from "../../text/text";
 
 export default function TableMobile({
   tableClassName,
@@ -17,6 +18,8 @@ export default function TableMobile({
   tableHeadStyleObject,
   headerClassName,
   headerStyleObject,
+  textClassName,
+  textStyleObject,
   columns,
   setColumns,
   tableHeadCellClassName,
@@ -200,7 +203,7 @@ export default function TableMobile({
                           ...(rowBackground != null && { backgroundColor: rowBackground }),
                         }}
                       >
-                        {renderCellValue(row?.data?.[column.mapto])}
+                        <Text className={textClassName} style={textStyleObject}>{renderCellValue(row?.data?.[column.mapto])}</Text>
                       </td>
                     ) : null
                   )}

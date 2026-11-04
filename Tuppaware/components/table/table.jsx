@@ -57,11 +57,17 @@ export default function Table({
   headerStyle = {},
   defaultHeaderStyle = { fontFamily: "system-ui", margin: 0, fontSize: "inherit", fontWeight: "inherit" },
 
+  textClassName = "",
+  textStyle = {},
+  defaultTextStyle = { fontFamily: "system-ui", margin: 0, fontSize: "inherit", fontWeight: "inherit" },
+
   columns = [],
   setColumns = NOOP,
+
   tableHeadCellClassName = "",
   tableHeadCellStyle = {},
   defaultTableHeadCellStyle = { padding: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
+
   columnSelectIconClass = "fa fa-bars",
   columnAddIconClass = "fa fa-plus",
   defaultAddColumnIconStyle = {},
@@ -104,14 +110,14 @@ export default function Table({
   onRowClick = NOOP,
 
 }) {
-  // const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
-  const shouldBeMobile = true;
+  const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
   const headerStyleObject = replaceDefaults(defaultHeaderStyle, headerStyle);
   const tableHeadCellStyleObject = replaceDefaults(defaultTableHeadCellStyle, tableHeadCellStyle);
   const addColumnIconStyleObject = replaceDefaults(defaultAddColumnIconStyle, addColumnIconStyle);
+  const textStyleObject = replaceDefaults(defaultTextStyle, textStyle);
   const addColumnIconContainerStyleObject = replaceDefaults(defaultAddColumnIconContainerStyle, addColumnIconContainerStyle);
   const tableHeadBackgroundStyle = getHeaderBackgroundColor(tableHeadStyleObject);
 
@@ -271,6 +277,8 @@ export default function Table({
     tableHeadBackgroundStyle,
     headerClassName,
     headerStyleObject,
+    textClassName,
+    textStyleObject,
     columns,
     tableHeadCellClassName,
     useActionsColumn,

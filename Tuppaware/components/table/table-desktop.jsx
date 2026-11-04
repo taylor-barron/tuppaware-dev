@@ -6,6 +6,7 @@ import FlexBox from "../../containers/flexbox";
 import Header from "../../text/header";
 import Icon from "../../text/icon";
 import TableActionButton from "./table-action-button";
+import Text from "../../text/text";
 
 export default function TableDesktop({
   tableClassName,
@@ -15,6 +16,8 @@ export default function TableDesktop({
   tableHeadBackgroundStyle,
   headerClassName,
   headerStyleObject,
+  textClassName,
+  textStyleObject,
   columns,
   tableHeadCellClassName,
   useActionsColumn,
@@ -114,7 +117,7 @@ export default function TableDesktop({
             <tr key={rowIndex} style={rowStyle} onClick={() => handleRowClick(row, rowIndex)}>
               {columns.map((column, cellIndex) => (
                 <td key={cellIndex} style={getBodyCellStyle(cellIndex)}>
-                  {renderCellValue(row?.data?.[column.mapto])}
+                  <Text className={textClassName} style={textStyleObject}>{renderCellValue(row?.data?.[column.mapto])}</Text>
                 </td>
               ))}
 
