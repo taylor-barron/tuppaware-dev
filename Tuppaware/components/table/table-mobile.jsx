@@ -3,6 +3,7 @@
 import { useLayoutEffect, useMemo, useState } from "react";
 import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
 import FlexBox from "../../containers/flexbox";
+import Header from "../../text/header";
 import Icon from "../../text/icon";
 import { renderCellValue, selectColumns, computeInitiallyShowActionColumn, ACTION_COLUMN_MAPTO } from "./table-service";
 import OverlayModal from "../../modals/overlaymodal";
@@ -14,6 +15,8 @@ export default function TableMobile({
   tableStyleObject,
   tableHeadClassName,
   tableHeadStyleObject,
+  headerClassName,
+  headerStyleObject,
   columns,
   setColumns,
   tableHeadCellClassName,
@@ -143,7 +146,7 @@ export default function TableMobile({
                     <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle}}>
                       <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(column.mapto)}} />
 
-                      {column.name}
+                      <Header className={headerClassName} style={headerStyleObject}>{column.name}</Header>
                     </FlexBox>
 
                     <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }} onClick={() => onColumnSort(columnIndex)}>
@@ -160,7 +163,7 @@ export default function TableMobile({
                   <FlexBox direction="row" horizontal="left" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
                     <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => columnSelect(ACTION_COLUMN_MAPTO)}/>
 
-                    {actionColumn.name}
+                    <Header className={headerClassName} style={headerStyleObject}>{actionColumn.name}</Header>
                   </FlexBox>
                 </th>
               )}

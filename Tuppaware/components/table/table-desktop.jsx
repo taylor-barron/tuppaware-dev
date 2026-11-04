@@ -3,6 +3,7 @@
 import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
 import { renderCellValue } from "./table-service";
 import FlexBox from "../../containers/flexbox";
+import Header from "../../text/header";
 import Icon from "../../text/icon";
 import TableActionButton from "./table-action-button";
 
@@ -12,6 +13,8 @@ export default function TableDesktop({
   tableHeadClassName,
   tableHeadStyleObject,
   tableHeadBackgroundStyle,
+  headerClassName,
+  headerStyleObject,
   columns,
   tableHeadCellClassName,
   useActionsColumn,
@@ -56,7 +59,7 @@ export default function TableDesktop({
               style={getHeaderStyle(index)}
             >
               <FlexBox direction="row" horizontal="space-between" onClick={() => onColumnSort(index)} style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
-                {header.name}
+                <Header className={headerClassName} style={headerStyleObject }>{header.name}</Header>
 
                 {header.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}
                 {header.sort === SORT_DESC && <Icon className={sortDescendingIcon} />}
@@ -86,7 +89,7 @@ export default function TableDesktop({
               className={tableHeadCellClassName}
               style={getHeaderStyle(columns.length)}
             >
-              {actionColumn.name}
+              <Header className={headerClassName} style={headerStyleObject}>{actionColumn.name}</Header>
             </th>
           )}
         </tr>

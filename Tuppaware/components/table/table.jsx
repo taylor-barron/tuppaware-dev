@@ -2,6 +2,7 @@
 
 // TODO: find any styling that needs to be moved to the top level for expected control
 // TODO: go through vars, make sure they are useful and grouped well
+// TODO: throw errors for invalid states like true for both buttons or "actionColumn" being used as a mapTo
 // TODO: update tests
 // TODO: update documentation
 
@@ -39,7 +40,6 @@ export default function Table({
   useActionsColumn = false,
   actionColWidth = 140,
   actionColumn = { name: "Actions" },
-  
   useActionButton = false,
   actionButtonData = {},
   useDropdownButton = false,
@@ -52,6 +52,10 @@ export default function Table({
   tableHeadClassName = "",
   tableHeadStyle = {},
   defaultTableHeadStyle = { backgroundColor: "#f2f2f2", textAlign: "left", fontFamily: "system-ui" },
+
+  headerClassName = "",
+  headerStyle = {},
+  defaultHeaderStyle = { fontFamily: "system-ui", margin: 0, fontSize: "inherit", fontWeight: "inherit" },
 
   columns = [],
   setColumns = NOOP,
@@ -100,10 +104,12 @@ export default function Table({
   onRowClick = NOOP,
 
 }) {
-  const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
+  // const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
+  const shouldBeMobile = true;
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
+  const headerStyleObject = replaceDefaults(defaultHeaderStyle, headerStyle);
   const tableHeadCellStyleObject = replaceDefaults(defaultTableHeadCellStyle, tableHeadCellStyle);
   const addColumnIconStyleObject = replaceDefaults(defaultAddColumnIconStyle, addColumnIconStyle);
   const addColumnIconContainerStyleObject = replaceDefaults(defaultAddColumnIconContainerStyle, addColumnIconContainerStyle);
@@ -263,6 +269,8 @@ export default function Table({
     tableHeadClassName,
     tableHeadStyleObject,
     tableHeadBackgroundStyle,
+    headerClassName,
+    headerStyleObject,
     columns,
     tableHeadCellClassName,
     useActionsColumn,
@@ -292,21 +300,21 @@ export default function Table({
 
   return (
     shouldBeMobile ? 
-    <TableMobile
-      {...commonProps}
-      columnSelectIconClass={columnSelectIconClass}
-      addColumnIconContainerStyle={addColumnIconContainerStyleObject}
-      columnAddIconClass={columnAddIconClass}
-      maxMobileColumns={maxMobileColumns}
-      addColumnIconStyle={addColumnIconStyleObject}
-    />
+      <TableMobile
+        {...commonProps}
+        columnSelectIconClass={columnSelectIconClass}
+        addColumnIconContainerStyle={addColumnIconContainerStyleObject}
+        columnAddIconClass={columnAddIconClass}
+        maxMobileColumns={maxMobileColumns}
+        addColumnIconStyle={addColumnIconStyleObject}
+      />
     : (
-    <TableDesktop
-      {...commonProps}
-      headerRefs={headerRefs}
-      totalColumns={totalColumns}
-      getHeaderStyle={getHeaderStyle}
-      startResize={startResize}
-    />
+      <TableDesktop
+        {...commonProps}
+        headerRefs={headerRefs}
+        totalColumns={totalColumns}
+        getHeaderStyle={getHeaderStyle}
+        startResize={startResize}
+      />
   ));
 }
