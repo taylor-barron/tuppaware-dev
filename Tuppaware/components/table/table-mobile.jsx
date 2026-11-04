@@ -132,8 +132,6 @@ export default function TableMobile({
 
   const canAddColumn = showActionColumn ? selectedCount < (maxMobileColumns ?? columns.length) - 1 : selectedCount < (maxMobileColumns ?? columns.length);
 
-  // TODO: clean up/group variables, throw error for any mapTo == "actionColumn" in columns, write/update tests final testing before finishing table
-
   return (
     <>
       <FlexBox direction="row" vertical="flex-start">

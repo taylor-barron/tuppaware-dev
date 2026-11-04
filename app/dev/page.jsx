@@ -102,6 +102,8 @@ export default function DevContainer() {
           //   setRows(sortRows(rows, nextColumns, columnIndex));
           // }}
 
+          cascadeResize={true}
+
           rowData={rows}
           setRows={setRows}
 

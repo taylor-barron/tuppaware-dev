@@ -129,7 +129,14 @@ export function useInitializeColumnWidths({
   ]);
 }
 
-export function handleResizeEvent(event, resizeStateRef, minColWidth, latestWidthsRef, setColumnWidths) {
+export function handleResizeEvent(
+  event,
+  resizeStateRef,
+  minColWidth,
+  latestWidthsRef,
+  setColumnWidths,
+  cascadeResize = false
+) {
   const state = resizeStateRef.current;
   if (!state) return;
 
@@ -139,13 +146,48 @@ export function handleResizeEvent(event, resizeStateRef, minColWidth, latestWidt
   if (leftStart == null || rightStart == null) return;
 
   const delta = event.clientX - startX;
-  const maxGrow = rightStart - minColWidth;
-  const maxShrink = leftStart - minColWidth;
-  const appliedDelta = Math.max(-maxShrink, Math.min(delta, maxGrow));
-
   const next = [...startWidths];
-  next[index] = leftStart + appliedDelta;
-  next[index + 1] = rightStart - appliedDelta;
+
+  if (cascadeResize && delta > 0) {
+    // growing: take space from the nearest right column first, then continue outward
+    let available = 0;
+    for (let i = index + 1; i < startWidths.length; i += 1) {
+      available += Math.max(0, startWidths[i] - minColWidth);
+    }
+
+    const applied = Math.min(delta, available);
+    next[index] = leftStart + applied;
+
+    let remaining = applied;
+    for (let i = index + 1; i < startWidths.length && remaining > 0; i += 1) {
+      const take = Math.min(remaining, Math.max(0, startWidths[i] - minColWidth));
+      next[i] = startWidths[i] - take;
+      remaining -= take;
+    }
+  } else if (cascadeResize && delta < 0) {
+    // shrinking: take space from the dragged column first, then columns further left
+    let available = 0;
+    for (let i = index; i >= 0; i -= 1) {
+      available += Math.max(0, startWidths[i] - minColWidth);
+    }
+
+    const applied = Math.min(-delta, available);
+    next[index + 1] = rightStart + applied;
+
+    let remaining = applied;
+    for (let i = index; i >= 0 && remaining > 0; i -= 1) {
+      const take = Math.min(remaining, Math.max(0, startWidths[i] - minColWidth));
+      next[i] = startWidths[i] - take;
+      remaining -= take;
+    }
+  } else {
+    const maxGrow = rightStart - minColWidth;
+    const maxShrink = leftStart - minColWidth;
+    const appliedDelta = Math.max(-maxShrink, Math.min(delta, maxGrow));
+
+    next[index] = leftStart + appliedDelta;
+    next[index + 1] = rightStart - appliedDelta;
+  }
 
   latestWidthsRef.current = next;
   setColumnWidths(next);

@@ -1,5 +1,10 @@
 "use client";
 
+// TODO: find any styling that needs to be moved to the top level for expected control
+// TODO: go through vars, make sure they are useful and grouped well
+// TODO: update tests
+// TODO: update documentation
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { replaceDefaults } from "../../utils/replacedefaults";
 import useIsBelowBreakPoint from "../../utils/watchmobilebreakpoint";
@@ -71,6 +76,7 @@ export default function Table({
   setRows,
   rowOrderKey = "order",
   minColWidth = 80,
+  cascadeResize = false,
   oddRowStyle = {},
   defaultOddRowStyle = { backgroundColor: "#ffffff", fontFamily: "system-ui" },
   evenRowStyle = {},
@@ -157,9 +163,9 @@ export default function Table({
 
   const handleResize = useCallback(
     (event) => {
-      handleResizeEvent(event, resizeStateRef, minColWidth, latestWidthsRef, setColumnWidths);
+      handleResizeEvent(event, resizeStateRef, minColWidth, latestWidthsRef, setColumnWidths, cascadeResize);
     },
-    [minColWidth]
+    [minColWidth, cascadeResize]
   );
 
   const stopResize = useCallback(() => {
