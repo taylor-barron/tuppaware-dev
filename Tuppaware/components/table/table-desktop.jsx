@@ -1,8 +1,6 @@
 "use client";
 
 import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
-import Button from "../../buttons/button";
-import DropdownButton from "../../buttons/dropdownbutton";
 import { renderCellValue } from "./table-service";
 import FlexBox from "../../containers/flexbox";
 import Icon from "../../text/icon";
@@ -103,7 +101,6 @@ export default function TableDesktop({
               ? { ...defaultEvenRowStyle, ...evenRowStyle }
               : { ...defaultOddRowStyle, ...oddRowStyle };
 
-          const cells = Array.isArray(row?.data) ? row.data : [];
           const rowDropdownItems = Array.isArray(dropdownButtonData.dropdownItems)
             ? dropdownButtonData.dropdownItems.map((item) => ({
                 ...item,

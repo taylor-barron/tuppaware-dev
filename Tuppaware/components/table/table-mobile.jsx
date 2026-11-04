@@ -2,11 +2,8 @@
 
 import { useLayoutEffect, useMemo, useState } from "react";
 import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
-import Button from "../../buttons/button";
-import DropdownButton from "../../buttons/dropdownbutton";
 import FlexBox from "../../containers/flexbox";
 import Icon from "../../text/icon";
-import Modal from "../../modals/modal";
 import { renderCellValue, selectColumns, computeInitiallyShowActionColumn, ACTION_COLUMN_MAPTO } from "./table-service";
 import OverlayModal from "../../modals/overlaymodal";
 import VerticalList from "../list/verticallist";
@@ -38,7 +35,6 @@ export default function TableMobile({
   dropdownButtonData,
   useActionButton,
   actionButtonData,
-  getHeaderStyle,
   onColumnSort,
   addColumnIconStyle,
   tableHeadBackgroundStyle,
