@@ -22,6 +22,28 @@ import {
   useEmitColumnChanges,
 } from "../table-service";
 
+// ---------------------------------------------------------------------------
+// Local fixtures — do NOT import from table-test-utils so this file stays
+// dependency-free (apart from renderHook for the one hook test) and can run
+// in isolation.
+// ---------------------------------------------------------------------------
+const threeColumns = () => [
+  { name: "Name", mapto: "name" },
+  { name: "Age", mapto: "age" },
+  { name: "Location", mapto: "location" },
+];
+
+const twoColumns = () => [
+  { name: "Name", mapto: "name" },
+  { name: "Age", mapto: "age" },
+];
+
+const people = () => [
+  { data: { name: "Charlie", age: 35 } },
+  { data: { name: "Alice", age: 25 } },
+  { data: { name: "Bob", age: 30 } },
+];
+
 describe("table-service.js", () => {
   describe("constants", () => {
     it("exposes the expected values", () => {
@@ -248,11 +270,6 @@ describe("table-service.js", () => {
       { name: "Name", mapto: "name", sort: nameSort },
       { name: "Age", mapto: "age", sort: ageSort },
     ];
-    const people = () => [
-      { data: { name: "Charlie", age: 35 } },
-      { data: { name: "Alice", age: 25 } },
-      { data: { name: "Bob", age: 30 } },
-    ];
     const names = (rows) => rows.map((r) => r.data.name);
     const ages = (rows) => rows.map((r) => r.data.age);
 
@@ -348,7 +365,7 @@ describe("table-service.js", () => {
       expect(computeInitiallyShowActionColumn(true, { name: "A" }, 2, cols)).toBe(false);
     });
     it("falls back to columns.length when maxMobileColumns is null", () => {
-      const cols = threeColumns(); // 0 selected
+      const cols = threeColumns();
       expect(computeInitiallyShowActionColumn(true, { name: "A" }, null, cols)).toBe(true);
     });
   });
