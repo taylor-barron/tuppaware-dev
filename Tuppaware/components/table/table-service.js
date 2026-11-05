@@ -349,9 +349,7 @@ export function sortRows(rows = [], columns = [], columnIndex) {
   const mapTo = columns[columnIndex]?.mapto;
 
   const currentSort = columns[columnIndex]?.sort;
-  if (currentSort == undefined) {
-
-  } else if (currentSort === SORT_NONE) {
+  if (currentSort === SORT_NONE || currentSort == undefined) {
     return rows
       .map((row) => ({ ...row, order: row.originalOrder }))
       .sort((a, b) => a.originalOrder - b.originalOrder);

@@ -111,7 +111,6 @@ export default function Table({
 
 }) {
   const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
-  // const shouldBeMobile = true;
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
