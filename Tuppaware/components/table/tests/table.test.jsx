@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Table from "../table";
+import Table from "../src/table";
 import {
   DefaultSortHarness,
   MobileHarness,
@@ -369,7 +369,7 @@ describe("table.jsx", () => {
       const { container } = render(
         <Table columns={baseColumns()} rowData={baseRows()} onColumnsChange={onColumnsChange} />
       );
-      
+
       await waitFor(() => expect(onColumnsChange).toHaveBeenCalled());
       onColumnsChange.mockClear();
 

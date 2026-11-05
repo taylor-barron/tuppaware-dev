@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "../../buttons/button";
-import DropdownButton from "../../buttons/dropdownbutton";
+import Button from "../../../buttons/button";
+import DropdownButton from "../../../buttons/dropdownbutton";
 
 export default function TableActionButton({
   isVisible,

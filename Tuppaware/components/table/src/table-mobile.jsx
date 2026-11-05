@@ -1,15 +1,15 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useState } from "react";
-import { SORT_ASC, SORT_DESC, SORT_NONE } from './table-service';
-import FlexBox from "../../containers/flexbox";
-import Header from "../../text/header";
-import Icon from "../../text/icon";
-import { renderCellValue, selectColumns, computeInitiallyShowActionColumn, ACTION_COLUMN_MAPTO } from "./table-service";
-import OverlayModal from "../../modals/overlaymodal";
-import VerticalList from "../list/verticallist";
+import { SORT_ASC, SORT_DESC, SORT_NONE } from '../utils/table-service';
+import FlexBox from "../../../containers/flexbox";
+import Header from "../../../text/header";
+import Icon from "../../../text/icon";
+import { renderCellValue, selectColumns, computeInitiallyShowActionColumn, ACTION_COLUMN_MAPTO } from "../utils/table-service";
+import OverlayModal from "../../../modals/overlaymodal";
+import VerticalList from "../../list/verticallist";
 import TableActionButton from "./table-action-button";
-import Text from "../../text/text";
+import Text from "../../../text/text";
 
 export default function TableMobile({
   columns,

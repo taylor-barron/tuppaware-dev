@@ -5,8 +5,8 @@
 // TODO: update documentation
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { replaceDefaults } from "../../utils/replacedefaults";
-import useIsBelowBreakPoint from "../../utils/watchmobilebreakpoint";
+import { replaceDefaults } from "../../../utils/replacedefaults";
+import useIsBelowBreakPoint from "../../../utils/watchmobilebreakpoint";
 import {
   useEmitColumnChanges,
   getMeasuredWidth,
@@ -24,7 +24,7 @@ import {
   sortRows,
   numberRows,
 
-} from "./table-service";
+} from "../utils/table-service";
 import TableDesktop from "./table-desktop";
 import TableMobile from "./table-mobile";
 

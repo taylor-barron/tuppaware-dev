@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import Table from "../table";
+import Table from "../src/table";
 import {
   baseColumns,
   baseRows,
   stableActionColumn,
   setViewportWidth,
   useTableTestEnvironment,
-  
+
 } from "./table-test-utils";
 
 function Parent() {

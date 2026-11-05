@@ -1,13 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Table from "../table";
+import Table from "../src/table";
 import {
   baseColumns,
   baseRows,
   renderMobile,
   stableActionColumn,
   useTableTestEnvironment,
+
 } from "./table-test-utils";
 
 const rowMatcher = expect.objectContaining({ data: { name: "Taylor", age: "32" } });

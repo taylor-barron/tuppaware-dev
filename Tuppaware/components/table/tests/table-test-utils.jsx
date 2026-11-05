@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect } from "vitest";
 import { act, render, waitFor } from "@testing-library/react";
 import { useState } from "react";
-import Table from "../table";
+import Table from "../src/table";
 
 // ---------------------------------------------------------------------------
 // Breakpoint / matchMedia mock

@@ -20,7 +20,8 @@ import {
   sortRows,
   updateColumns,
   useEmitColumnChanges,
-} from "../table-service";
+
+} from "../utils/table-service";
 
 const threeColumns = () => [
   { name: "Name", mapto: "name" },

@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 
-import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from '../../Tuppaware/components/table/table-service';
+import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from '../../Tuppaware/components/table/utils/table-service';
 import Button from '../../Tuppaware/buttons/button';
 import DropdownButton from '../../Tuppaware/buttons/dropdownbutton';
 import FlexBox from '../../Tuppaware/containers/flexbox';
 import Header from '../../Tuppaware/text/header';
 import Nav from '../../Tuppaware/components/nav';
-import Table from '../../Tuppaware/components/table/table';
+import Table from '../../Tuppaware/components/table/src/table';
 import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
