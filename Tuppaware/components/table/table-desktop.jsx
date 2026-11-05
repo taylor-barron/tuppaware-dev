@@ -131,6 +131,7 @@ export default function TableDesktop({
                 isVisible={useActionsColumn}
                 columns={columns}
                 getActionCellStyle={getActionCellStyle}
+                rowBackground={rowStyle.backgroundColor}
                 useDropdownButton={useDropdownButton}
                 dropdownButtonData={dropdownButtonData}
                 rowDropdownItems={rowDropdownItems}
