@@ -3,14 +3,12 @@ import { act, render, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import Table from "../src/table";
 
-// ---------------------------------------------------------------------------
-// Breakpoint / matchMedia mock
-// ---------------------------------------------------------------------------
 export const DESKTOP_WIDTH = 1024;
 export const MOBILE_WIDTH = 500;
 
 let viewportWidth = DESKTOP_WIDTH;
-const mediaListeners = new Set();
+
+const mqlEntries = new Map();
 
 const evaluateQuery = (query, width) => {
   const max = /max-width:\s*(\d+)/.exec(query);
@@ -25,35 +23,68 @@ export const installMatchMedia = () => {
       get matches() {
         return evaluateQuery(query, viewportWidth);
       },
-      addEventListener: (_type, listener) => mediaListeners.add({ query, listener, mql }),
-      removeEventListener: (_type, listener) => {
-        mediaListeners.forEach((entry) => {
-          if (entry.listener === listener) mediaListeners.delete(entry);
-        });
+      addEventListener: (_type, listener) => {
+        const entry = mqlEntries.get(mql);
+        if (!entry) return;
+        entry.listeners.add(listener);
       },
-      addListener: () => {},
-      removeListener: () => {},
+      removeEventListener: (_type, listener) => {
+        const entry = mqlEntries.get(mql);
+        if (!entry) return;
+        entry.listeners.delete(listener);
+      },
+      // Legacy API kept for compatibility with code paths that use it.
+      addListener: (listener) => {
+        const entry = mqlEntries.get(mql);
+        if (!entry) return;
+        entry.listeners.add(listener);
+      },
+      removeListener: (listener) => {
+        const entry = mqlEntries.get(mql);
+        if (!entry) return;
+        entry.listeners.delete(listener);
+      },
     };
+    mqlEntries.set(mql, { query, listeners: new Set() });
     return mql;
   };
 };
 
-const notifyListeners = (width) => {
+/**
+ * Change the simulated viewport width and dispatch `change` events only to the
+ * MediaQueryLists whose `matches` value transitioned as a result. This is the
+ * behavior the real browser exhibits, and it's what makes the breakpoint test
+ * meaningful: a component that ignores `event.matches`, or forgets to register
+ * a listener, or forgets to remove it, will visibly fail.
+ */
+export const setViewportWidth = (width) => {
+  const previousWidth = viewportWidth;
+  viewportWidth = width;
+  window.innerWidth = width;
+
+  // Collect the mqls whose matches value flipped, and dispatch to each.
+  const transitions = [];
+  mqlEntries.forEach((entry, mql) => {
+    const before = evaluateQuery(entry.query, previousWidth);
+    const after = evaluateQuery(entry.query, width);
+    if (before !== after) {
+      transitions.push({ mql, entry, matches: after });
+    }
+  });
+
+  if (transitions.length === 0) return;
+
   act(() => {
-    mediaListeners.forEach(({ query, listener }) => {
-      listener({ matches: evaluateQuery(query, width), media: query });
+    transitions.forEach(({ entry, matches }) => {
+      entry.listeners.forEach((listener) => {
+        listener({ matches, media: entry.query });
+      });
     });
   });
 };
 
-export const setViewportWidth = (width) => {
-  viewportWidth = width;
-  window.innerWidth = width;
-  notifyListeners(width);
-};
-
-const resetViewport = () => {
-  mediaListeners.clear();
+const resetMatchMedia = () => {
+  mqlEntries.clear();
   viewportWidth = DESKTOP_WIDTH;
   window.innerWidth = DESKTOP_WIDTH;
   installMatchMedia();
@@ -61,18 +92,16 @@ const resetViewport = () => {
 
 export const useTableTestEnvironment = () => {
   beforeEach(() => {
-    resetViewport();
+    resetMatchMedia();
   });
   afterEach(() => {
-    mediaListeners.clear();
-    viewportWidth = DESKTOP_WIDTH;
-    window.innerWidth = DESKTOP_WIDTH;
+    resetMatchMedia();
     document.body.style.cursor = "";
     document.body.style.userSelect = "";
   });
 };
 
-export const renderMobile = async (ui, selector = ".fa-bars") => {
+export const renderMobile = async (ui, selector = "table") => {
   setViewportWidth(MOBILE_WIDTH);
   const result = render(ui);
   await waitFor(() => expect(result.container.querySelector(selector)).toBeInTheDocument());

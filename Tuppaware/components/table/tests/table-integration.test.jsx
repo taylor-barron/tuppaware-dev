@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
@@ -9,7 +9,6 @@ import {
   stableActionColumn,
   setViewportWidth,
   useTableTestEnvironment,
-
 } from "./table-test-utils";
 
 function Parent() {
@@ -75,15 +74,52 @@ describe("table integration (parent-controlled)", () => {
     await waitFor(() => expect(screen.getByTestId("lengths").textContent).toBe("200,120"));
   });
 
-  it("switches layouts across the breakpoint while keeping data", async () => {
+  it("switches layouts across the breakpoint while keeping data (honest media-query flow)", async () => {
     const { container } = render(<Parent />);
+
+    // Mounted at DESKTOP_WIDTH. No .fa-bars (the mobile add-column tab) should exist.
     expect(container.querySelector(".fa-bars")).not.toBeInTheDocument();
+    expect(container.querySelectorAll("th").length).toBe(2);
+    expect(screen.getByText("Charlie")).toBeInTheDocument();
+
+    // Width change that DOES NOT cross the breakpoint (1024 -> 900).
+    // The mock only dispatches `change` when `matches` flips, so this is a
+    // no-op: no listener fires, no state changes, no re-render.
+    act(() => setViewportWidth(900));
+    expect(container.querySelector(".fa-bars")).not.toBeInTheDocument();
+    expect(container.querySelectorAll("th").length).toBe(2);
+    expect(screen.getByText("Charlie")).toBeInTheDocument();
+
+    // Cross below the breakpoint (900 -> 500). Listener fires with matches:true.
     act(() => setViewportWidth(500));
     await waitFor(() => expect(container.querySelector(".fa-bars")).toBeInTheDocument());
     expect(screen.getByText("Charlie")).toBeInTheDocument();
+
+    // Cross back above the breakpoint (500 -> 1024). Listener fires with matches:false.
     act(() => setViewportWidth(1024));
     await waitFor(() => expect(container.querySelector(".fa-bars")).not.toBeInTheDocument());
     expect(screen.getByText("Charlie")).toBeInTheDocument();
+  });
+
+  it("rejects a bogus mock: a component that ignores event.matches would fail", async () => {
+    // This is a meta-test: it ensures the mock is honest by verifying that
+    // the width change from 1024 -> 900 does NOT dispatch a `change` event
+    // (because 1024 and 900 are both > 768). If a mock cheats by broadcasting
+    // to every listener on every call, this listener would fire.
+    const listener = vi.fn();
+    const mql = window.matchMedia("(max-width: 768px)");
+    mql.addEventListener("change", listener);
+
+    act(() => setViewportWidth(900));
+    expect(listener).not.toHaveBeenCalled();
+
+    act(() => setViewportWidth(500));
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledWith({ matches: true, media: "(max-width: 768px)" });
+
+    act(() => setViewportWidth(1024));
+    expect(listener).toHaveBeenCalledTimes(2);
+    expect(listener).toHaveBeenLastCalledWith({ matches: false, media: "(max-width: 768px)" });
   });
 
   it("full flow: sort, select a row, resize a column", async () => {
@@ -131,13 +167,10 @@ describe("table integration (parent-controlled)", () => {
 
     await waitFor(() => expect(screen.getByTestId("lengths").textContent).toBe("200,120"));
 
-    // After the parent's state round-trip, the table must still render at the
-    // new widths — not fall back to a measured/default width.
     const headers = container.querySelectorAll("th");
     expect(headers[0].style.width).toBe("200px");
     expect(headers[1].style.width).toBe("120px");
 
-    // Other column fields must survive the emit→setColumns→re-render cycle.
     expect(screen.getByText("Name")).toBeInTheDocument();
     expect(screen.getByText("Age")).toBeInTheDocument();
     expect(screen.getByText("Taylor")).toBeInTheDocument();
@@ -157,7 +190,6 @@ describe("table integration (parent-controlled)", () => {
     await waitFor(() => expect(onColumnsChange).toHaveBeenCalled());
     onColumnsChange.mockClear();
 
-    // Drag the handle between the last data column and the action column.
     const handle = container.querySelectorAll("th")[1].querySelector("div[style*='col-resize']");
     fireEvent.mouseDown(handle, { clientX: 100 });
     fireEvent.mouseMove(window, { clientX: 120 });
