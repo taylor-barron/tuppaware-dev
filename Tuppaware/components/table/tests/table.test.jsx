@@ -3,10 +3,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Table from "../table";
 import {
+  DefaultSortHarness,
+  MobileHarness,
   baseColumns,
   baseRows,
   renderMobile,
+  setViewportWidth,
   useTableTestEnvironment,
+
 } from "./table-test-utils";
 
 describe("table.jsx", () => {
@@ -17,16 +21,24 @@ describe("table.jsx", () => {
       const desktop = render(<Table columns={baseColumns()} rowData={baseRows()} />);
       expect(desktop.container.querySelector(".fa-bars")).not.toBeInTheDocument();
       desktop.unmount();
-      const { container } = await renderMobile(<Table columns={baseColumns()} rowData={baseRows()} />);
+
+      const { container } = await renderMobile(
+        <MobileHarness initialColumns={baseColumns()} rowData={baseRows()} />,
+        ".fa-bars"
+      );
       expect(container.querySelector(".fa-bars")).toBeInTheDocument();
     });
 
     it("respects a custom mobileBreakPoint", async () => {
-      // just above default 768, but below 1200 → mobile
-      await renderMobile(
-        <Table columns={baseColumns()} rowData={baseRows()} mobileBreakPoint={1200} />,
-        ".fa-bars"
+      setViewportWidth(900);
+      const { container } = render(
+        <MobileHarness
+          initialColumns={baseColumns()}
+          rowData={baseRows()}
+          mobileBreakPoint={1200}
+        />
       );
+      await waitFor(() => expect(container.querySelector(".fa-bars")).toBeInTheDocument());
     });
 
     it("applies default styles and icon classes", () => {
@@ -102,7 +114,13 @@ describe("table.jsx", () => {
 
     it("className props applied", () => {
       const { container } = render(
-        <Table columns={baseColumns()} rowData={baseRows()} tableClassName="t" tableHeadClassName="h" tableHeadCellClassName="c" />
+        <Table
+          columns={baseColumns()}
+          rowData={baseRows()}
+          tableClassName="t"
+          tableHeadClassName="h"
+          tableHeadCellClassName="c"
+        />
       );
       expect(container.querySelector("table")).toHaveClass("t");
       expect(container.querySelector("thead")).toHaveClass("h");
@@ -160,7 +178,10 @@ describe("table.jsx", () => {
   describe("row selection and click", () => {
     it("starts with rows[].selected", () => {
       const { container } = render(
-        <Table columns={baseColumns()} rowData={[{ data: { name: "A" } }, { data: { name: "B" }, selected: true }]} />
+        <Table
+          columns={baseColumns()}
+          rowData={[{ data: { name: "A" } }, { data: { name: "B" }, selected: true }]}
+        />
       );
       expect(container.querySelectorAll("tbody tr")[1]).toHaveStyle("background-color: rgb(217, 237, 247)");
     });
@@ -207,8 +228,6 @@ describe("table.jsx", () => {
   });
 
   describe("sorting (default handler)", () => {
-    // Import DefaultSortHarness lazily inside this block to keep fixtures local.
-    const { DefaultSortHarness } = require("./table-test-utils");
     const headerOf = (name) => screen.getByText(name).closest("th");
     const colValues = (container, i) =>
       [...container.querySelectorAll("tbody tr")].map((tr) => tr.querySelectorAll("td")[i].textContent);
@@ -253,7 +272,10 @@ describe("table.jsx", () => {
       const setColumns = vi.fn();
       render(
         <Table
-          columns={[{ name: "Name", mapto: "name" }, { name: "Age", mapto: "age" }]}
+          columns={[
+            { name: "Name", mapto: "name" },
+            { name: "Age", mapto: "age" },
+          ]}
           rowData={[
             { data: { name: "Charlie", age: 35 } },
             { data: { name: "Alice", age: 25 } },
@@ -291,18 +313,33 @@ describe("table.jsx", () => {
 
     it("uses actionColumn.length then actionColWidth", () => {
       const a = render(
-        <Table columns={baseColumns()} rowData={baseRows()} useActionsColumn actionColumn={{ name: "Actions", length: 200 }} />
+        <Table
+          columns={baseColumns()}
+          rowData={baseRows()}
+          useActionsColumn
+          actionColumn={{ name: "Actions", length: 200 }}
+        />
       );
       expect(widthOf(a.container, 2)).toBe("200px");
       a.unmount();
       const b = render(
-        <Table columns={baseColumns()} rowData={baseRows()} useActionsColumn actionColumn={{ name: "Actions" }} actionColWidth={150} />
+        <Table
+          columns={baseColumns()}
+          rowData={baseRows()}
+          useActionsColumn
+          actionColumn={{ name: "Actions" }}
+          actionColWidth={150}
+        />
       );
       expect(widthOf(b.container, 2)).toBe("150px");
     });
 
     it("cascadeResize false only takes from neighbor", () => {
-      const cols = [{ name: "Name", mapto: "name" }, { name: "Age", mapto: "age" }, { name: "Location", mapto: "location" }];
+      const cols = [
+        { name: "Name", mapto: "name" },
+        { name: "Age", mapto: "age" },
+        { name: "Location", mapto: "location" },
+      ];
       const { container } = render(
         <Table columns={cols} rowData={[{ data: { name: "A" } }]} minColWidth={100} cascadeResize={false} />
       );
@@ -313,7 +350,11 @@ describe("table.jsx", () => {
     });
 
     it("cascadeResize true takes from further columns", () => {
-      const cols = [{ name: "Name", mapto: "name" }, { name: "Age", mapto: "age" }, { name: "Location", mapto: "location" }];
+      const cols = [
+        { name: "Name", mapto: "name" },
+        { name: "Age", mapto: "age" },
+        { name: "Location", mapto: "location" },
+      ];
       const { container } = render(
         <Table columns={cols} rowData={[{ data: { name: "A" } }]} minColWidth={100} cascadeResize />
       );
@@ -328,7 +369,7 @@ describe("table.jsx", () => {
       const { container } = render(
         <Table columns={baseColumns()} rowData={baseRows()} onColumnsChange={onColumnsChange} />
       );
-      // wait for the initial layout effect emission to settle
+      
       await waitFor(() => expect(onColumnsChange).toHaveBeenCalled());
       onColumnsChange.mockClear();
 

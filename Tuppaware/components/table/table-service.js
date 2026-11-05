@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 
 export const SORT_ASC = "asc";
 export const SORT_DESC = "desc";
@@ -13,18 +13,38 @@ export function useEmitColumnChanges(
   onColumnsChange,
   lastEmittedSignatureRef
 ) {
+  // Hold the latest values in refs so the returned callback has stable
+  // identity across renders. Without this, the callback is recreated on
+  // every render (because `columns` is typically a fresh array), which
+  // makes downstream `useCallback` hooks (handleResize, stopResize) unstable
+  // and causes the unmount-cleanup effect in <Table> to tear down drag
+  // listeners mid-drag.
+  const columnsRef = useRef(columns);
+  columnsRef.current = columns;
+  const actionColumnRef = useRef(actionColumn);
+  actionColumnRef.current = actionColumn;
+  const useActionsColumnRef = useRef(useActionsColumn);
+  useActionsColumnRef.current = useActionsColumn;
+  const onColumnsChangeRef = useRef(onColumnsChange);
+  onColumnsChangeRef.current = onColumnsChange;
+
   return useCallback(
     (widths) => {
-      const nextColumns = columns.map((column, idx) => {
+      const cols = columnsRef.current;
+      const actCol = actionColumnRef.current;
+      const withActions = useActionsColumnRef.current;
+      const onChanges = onColumnsChangeRef.current;
+
+      const nextColumns = cols.map((column, idx) => {
         const nextLength = widths[idx];
         if (!column || !Number.isFinite(nextLength) || nextLength <= 0) return column;
         return column.length === nextLength ? column : { ...column, length: nextLength };
       });
 
       const nextActionColumn =
-        useActionsColumn && Number.isFinite(widths[columns.length]) && widths[columns.length] > 0
-          ? { ...actionColumn, length: widths[columns.length] }
-          : actionColumn;
+        withActions && Number.isFinite(widths[cols.length]) && widths[cols.length] > 0
+          ? { ...actCol, length: widths[cols.length] }
+          : actCol;
 
       const nextSignature = JSON.stringify({
         columns: nextColumns.map((c) => c?.length ?? null),
@@ -34,12 +54,12 @@ export function useEmitColumnChanges(
       if (nextSignature === lastEmittedSignatureRef.current) return;
       lastEmittedSignatureRef.current = nextSignature;
 
-      onColumnsChange({
+      onChanges({
         columns: nextColumns,
         actionColumn: nextActionColumn,
       });
     },
-    [actionColumn, columns, onColumnsChange, useActionsColumn, lastEmittedSignatureRef]
+    [lastEmittedSignatureRef]
   );
 }
 
@@ -149,7 +169,6 @@ export function handleResizeEvent(
   const next = [...startWidths];
 
   if (cascadeResize && delta > 0) {
-    // growing: take space from the nearest right column first, then continue outward
     let available = 0;
     for (let i = index + 1; i < startWidths.length; i += 1) {
       available += Math.max(0, startWidths[i] - minColWidth);
@@ -165,7 +184,6 @@ export function handleResizeEvent(
       remaining -= take;
     }
   } else if (cascadeResize && delta < 0) {
-    // shrinking: take space from the dragged column first, then columns further left
     let available = 0;
     for (let i = index; i >= 0; i -= 1) {
       available += Math.max(0, startWidths[i] - minColWidth);
@@ -334,9 +352,6 @@ export function ensureRowsHaveOrder(rows = [], rowOrderKey = "order") {
   });
 }
 
-/**
- * sort order should go from SORT_NONE -> SORT_ASC -> SORT_DESC -> SORT_NONE
- */
 export function sortRows(rows = [], columns = [], columnIndex) {
   if (!Array.isArray(rows)) return [];
   if (!Array.isArray(columns)) return [];
@@ -380,7 +395,7 @@ export function sortRows(rows = [], columns = [], columnIndex) {
 
 export function numberRows(rows = []) {
   if (!Array.isArray(rows)) return [];
-  
+
   let counter = 0;
   for (let i = 0; i < rows.length; i++) {
     rows[i].order = counter;
@@ -390,9 +405,6 @@ export function numberRows(rows = []) {
   return rows;
 }
 
-/**
- * order of update: SORT_NONE -> SORT_ASC -> SORT_DESC -> SORT_NONE
-*/
 export function updateColumns(columns = [], columnIndex) {
   if (!Array.isArray(columns)) return [];
 
@@ -413,7 +425,6 @@ export function updateColumns(columns = [], columnIndex) {
   return columns.map((column, index) => {
     if (index === columnIndex) {
       return { ...column, sort: nextSort };
-
     } else {
       return { ...column, sort: SORT_NONE };
     }
@@ -437,7 +448,6 @@ export function selectColumns(columns = [], actionColumnIncluded = false, select
     if (selected !== null && position === selected) isSelected = true;
     if (removed !== null && position === removed) isSelected = false;
 
-    // only default when nothing has been selected yet
     if (selected === null && removed === null && selectedCount === 0) {
       if (position === 0 || (position === 1 && !actionColumnIncluded)) isSelected = true;
     }

@@ -110,8 +110,8 @@ export default function Table({
   unsortedIcon = "fa fa-sort",
 
 }) {
-  // const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
-  const shouldBeMobile = true;
+  const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
+  // const shouldBeMobile = true;
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);

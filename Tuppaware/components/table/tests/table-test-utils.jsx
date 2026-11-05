@@ -38,9 +38,7 @@ export const installMatchMedia = () => {
   };
 };
 
-export const setViewportWidth = (width) => {
-  viewportWidth = width;
-  window.innerWidth = width;
+const notifyListeners = (width) => {
   act(() => {
     mediaListeners.forEach(({ query, listener }) => {
       listener({ matches: evaluateQuery(query, width), media: query });
@@ -48,12 +46,22 @@ export const setViewportWidth = (width) => {
   });
 };
 
-// Call in each test file's beforeEach/afterEach (or import this hook):
+export const setViewportWidth = (width) => {
+  viewportWidth = width;
+  window.innerWidth = width;
+  notifyListeners(width);
+};
+
+const resetViewport = () => {
+  mediaListeners.clear();
+  viewportWidth = DESKTOP_WIDTH;
+  window.innerWidth = DESKTOP_WIDTH;
+  installMatchMedia();
+};
+
 export const useTableTestEnvironment = () => {
   beforeEach(() => {
-    installMatchMedia();
-    viewportWidth = DESKTOP_WIDTH;
-    window.innerWidth = DESKTOP_WIDTH;
+    resetViewport();
   });
   afterEach(() => {
     mediaListeners.clear();
