@@ -1,231 +1,213 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Table from "../table";
 import {
-  DefaultSortHarness,
-  MobileHarness,
+  SORT_ASC,
+  SORT_DESC,
+  SORT_NONE,
+} from "../table-service";
+import {
   baseColumns,
   baseRows,
-  renderMobile,
-  stableActionColumn,
-  threeColumns,
+  twoColumns,
+  twoRows,
   useTableTestEnvironment,
 } from "./table-test-utils";
 
-describe("table-mobile.jsx", () => {
+const rowMatcher = expect.objectContaining({ data: { name: "Taylor", age: "32" } });
+
+describe("table-desktop.jsx", () => {
   useTableTestEnvironment();
 
-  const headerNames = (container) =>
-    [...container.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+  const headerOf = (name) => screen.getByText(name).closest("th");
 
-  describe("initial state", () => {
-    it("switches to mobile layout below the breakpoint", async () => {
-      const desktop = render(<Table columns={baseColumns()} rowData={baseRows()} />);
-      expect(desktop.container.querySelector(".fa-bars")).not.toBeInTheDocument();
-      desktop.unmount();
+  describe("header", () => {
+    it("renders headers and row data", () => {
+      render(<Table columns={baseColumns()} rowData={baseRows()} useActionsColumn={false} />);
+      expect(screen.getByText("Name")).toBeInTheDocument();
+      expect(screen.getByText("Age")).toBeInTheDocument();
+      expect(screen.getByText("Taylor")).toBeInTheDocument();
+      expect(screen.getByText("32")).toBeInTheDocument();
+    });
 
-      const { container } = await renderMobile(
-        <MobileHarness initialColumns={baseColumns()} rowData={baseRows()} />
+    it("applies class props", () => {
+      const { container } = render(
+        <Table
+          columns={baseColumns()}
+          rowData={baseRows()}
+          tableClassName="my-table"
+          tableHeadClassName="my-head"
+          tableHeadCellClassName="my-cell"
+          headerClassName="my-header"
+        />
       );
-      expect(container.querySelector(".fa-bars")).toBeInTheDocument();
+      expect(container.querySelector("table")).toHaveClass("my-table");
+      expect(container.querySelector("thead")).toHaveClass("my-head");
+      expect(container.querySelector("th")).toHaveClass("my-cell");
+      expect(container.querySelector(".my-header")).toBeInTheDocument();
     });
 
-    it("normalizes selections via setColumns when none are selected", async () => {
-      const onColumnsSet = vi.fn();
-      await renderMobile(<MobileHarness onColumnsSet={onColumnsSet} />);
-      await waitFor(() => expect(onColumnsSet).toHaveBeenCalled());
-      expect(onColumnsSet.mock.calls[0][0].map((c) => !!c.selected)).toEqual([true, true, false]);
-    });
-
-    it("does not re-call setColumns once normalized", async () => {
-      const onColumnsSet = vi.fn();
-      await renderMobile(<MobileHarness onColumnsSet={onColumnsSet} />);
-      await waitFor(() => expect(onColumnsSet).toHaveBeenCalled());
-      const calls = onColumnsSet.mock.calls.length;
-      await new Promise((r) => setTimeout(r, 50));
-      expect(onColumnsSet.mock.calls.length).toBe(calls);
+    it("uses fixed table layout", () => {
+      render(<Table columns={baseColumns()} rowData={baseRows()} />);
+      expect(screen.getByRole("table")).toHaveStyle("table-layout: fixed");
     });
   });
 
-  describe("header", () => {
-    it("only selected columns render a <th>", async () => {
-      const { container } = await renderMobile(<MobileHarness />);
-      expect(screen.queryByText("Location")).not.toBeInTheDocument();
-      expect(headerNames(container)).toEqual(["Name", "Age"]);
+  describe("sort icons", () => {
+    it("unsorted icon for no sort value", () => {
+      render(<Table columns={twoColumns()} rowData={twoRows()} useActionsColumn={false} />);
+      expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
+      expect(headerOf("Age").querySelector(".fa-sort")).toBeInTheDocument();
     });
 
-    it("renders the action <th> only when shown", async () => {
-      await renderMobile(<MobileHarness useActionsColumn actionColumn={stableActionColumn} />);
-      expect(screen.getByText("Actions")).toBeInTheDocument();
-    });
-
-    it("hides the action <th> when maxMobileColumns leaves no room", async () => {
-      // 2 data columns selected + maxMobileColumns=1 → action column cannot fit.
-      await renderMobile(
-        <MobileHarness useActionsColumn actionColumn={stableActionColumn} maxMobileColumns={1} />
+    it("ascending icon only on the SORT_ASC column", () => {
+      render(
+        <Table
+          columns={[{ name: "Name", mapto: "name", sort: SORT_ASC }, { name: "Age", mapto: "age", sort: SORT_NONE }]}
+          rowData={twoRows()}
+          useActionsColumn={false}
+        />
       );
-      expect(screen.queryByText("Actions")).not.toBeInTheDocument();
+      expect(headerOf("Name").querySelector(".fa-caret-up")).toBeInTheDocument();
+      expect(headerOf("Age").querySelector(".fa-caret-up")).not.toBeInTheDocument();
     });
 
-    it("clicking a header calls onColumnSort(columnIndex)", async () => {
+    it("descending icon only on the SORT_DESC column", () => {
+      render(
+        <Table
+          columns={[{ name: "Name", mapto: "name", sort: SORT_DESC }, { name: "Age", mapto: "age", sort: SORT_ASC }]}
+          rowData={twoRows()}
+          useActionsColumn={false}
+        />
+      );
+      expect(headerOf("Name").querySelector(".fa-caret-down")).toBeInTheDocument();
+      expect(headerOf("Age").querySelector(".fa-caret-down")).not.toBeInTheDocument();
+    });
+
+    it("custom icons override defaults", () => {
+      render(
+        <Table
+          columns={[{ name: "Name", mapto: "name", sort: SORT_ASC }, { name: "Age", mapto: "age" }]}
+          rowData={twoRows()}
+          useActionsColumn={false}
+          sortAscendingIcon="custom-asc"
+          unsortedIcon="custom-unsorted"
+        />
+      );
+      expect(headerOf("Name").querySelector(".custom-asc")).toBeInTheDocument();
+      expect(headerOf("Age").querySelector(".custom-unsorted")).toBeInTheDocument();
+    });
+
+    it("calls onColumnSort(index) and does not sort itself", async () => {
       const user = userEvent.setup();
       const onColumnSort = vi.fn();
-      await renderMobile(<MobileHarness onColumnSort={onColumnSort} />);
+      const { container } = render(
+        <Table columns={twoColumns()} rowData={twoRows()} useActionsColumn={false} onColumnSort={onColumnSort} />
+      );
       await user.click(screen.getByText("Age"));
       expect(onColumnSort).toHaveBeenCalledWith(1);
+      const names = [...container.querySelectorAll("tbody tr")].map((tr) => tr.querySelectorAll("td")[0].textContent);
+      expect(names).toEqual(["Charlie", "Alice", "Bob"]);
+    });
+  });
+
+  describe("resize handles", () => {
+    it("allows columns to be resized", () => {
+      const { container } = render(<Table columns={baseColumns()} rowData={baseRows()} useActionsColumn={false} />);
+      const firstHeader = container.querySelectorAll("th")[0];
+      const handle = firstHeader.querySelector("div[style*='col-resize']");
+      expect(firstHeader.style.width).toBe("160px");
+      fireEvent.mouseDown(handle, { clientX: 100 });
+      fireEvent.mouseMove(window, { clientX: 140 });
+      fireEvent.mouseUp(window);
+      expect(firstHeader.style.width).toBe("200px");
     });
 
-    it("uses columnSelectIconClass", async () => {
-      const { container } = await renderMobile(
-        <MobileHarness initialColumns={baseColumns()} rowData={baseRows()} columnSelectIconClass="fa fa-custom-select" />
-      );
-      await waitFor(() =>
-        expect(container.querySelectorAll(".fa-custom-select").length).toBeGreaterThan(0)
-      );
+    it("does not render a handle on the final data column", () => {
+      const { container } = render(<Table columns={baseColumns()} rowData={baseRows()} useActionsColumn={false} />);
+      const headers = container.querySelectorAll("th");
+      expect(headers[headers.length - 1].querySelector("div[style*='col-resize']")).toBeNull();
     });
   });
 
   describe("body", () => {
-    it("only selected columns render cells", async () => {
-      const { container } = await renderMobile(<MobileHarness />);
-      const firstRowCells = container.querySelectorAll("tbody tr")[0].querySelectorAll("td");
-      expect(firstRowCells).toHaveLength(2);
-      expect(screen.queryByText("NYC")).not.toBeInTheDocument();
-    });
-
-    it("even/odd row styles apply to rows and cells", async () => {
-      const { container } = await renderMobile(<MobileHarness />);
-      const rows = container.querySelectorAll("tbody tr");
-      expect(rows[0]).toHaveStyle("background-color: rgb(249, 249, 249)");
-      expect(rows[0].querySelector("td")).toHaveStyle("background-color: rgb(249, 249, 249)");
-      expect(rows[1]).toHaveStyle("background-color: rgb(255, 255, 255)");
-    });
-
-    it("applies selected style after a click", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderMobile(<MobileHarness />);
-      await user.click(screen.getByText("Alice"));
-      const row = container.querySelectorAll("tbody tr")[1];
-      expect(row).toHaveStyle("background-color: rgb(217, 237, 247)");
-      expect(row.querySelector("td")).toHaveStyle("background-color: rgb(217, 237, 247)");
-    });
-
     it("calls onRowClick with row and rowIndex", async () => {
       const user = userEvent.setup();
       const onRowClick = vi.fn();
-      await renderMobile(<MobileHarness onRowClick={onRowClick} />);
-      await user.click(screen.getByText("Bob"));
-      await waitFor(() =>
-        expect(onRowClick).toHaveBeenCalledWith(
-          expect.objectContaining({ data: expect.objectContaining({ name: "Bob" }) }),
-          2
-        )
-      );
+      render(<Table columns={baseColumns()} rowData={baseRows()} useActionsColumn={false} onRowClick={onRowClick} />);
+      await user.click(screen.getByText("Taylor"));
+      await waitFor(() => expect(onRowClick).toHaveBeenCalledWith(rowMatcher, 0));
     });
-  });
 
-  describe("add column tab", () => {
-    it("shown while below max, opens modal on click", async () => {
+    it("sets default row order on init when missing", async () => {
       const user = userEvent.setup();
-      const { container } = await renderMobile(<MobileHarness />);
-      const addIcon = container.querySelector(".fa-plus");
-      expect(addIcon).toBeInTheDocument();
-      await user.click(addIcon);
-      expect(await screen.findByText("Location")).toBeInTheDocument();
-    });
-
-    it("hidden once maxMobileColumns is reached", async () => {
-      const { container } = await renderMobile(<MobileHarness maxMobileColumns={2} />);
-      expect(container.querySelector(".fa-plus")).not.toBeInTheDocument();
-    });
-
-    it("reserves a slot for the visible action column", async () => {
-      const { container } = await renderMobile(
-        <MobileHarness useActionsColumn actionColumn={stableActionColumn} maxMobileColumns={2} />
-      );
-      // action column + 1 data column already fills the 2 slots
-      expect(container.querySelector(".fa-plus")).not.toBeInTheDocument();
-    });
-
-    it("uses columnAddIconClass and add-column container style", async () => {
-      const { container } = await renderMobile(
-        <MobileHarness
-          columnAddIconClass="fa fa-custom-add"
-          addColumnIconContainerStyle={{ backgroundColor: "rgb(255, 0, 0)" }}
+      const onRowClick = vi.fn();
+      render(
+        <Table
+          columns={baseColumns()}
+          rowData={[
+            { data: { name: "Taylor", age: "32" } },
+            { data: { name: "Alex", age: "28" } },
+          ]}
+          useActionsColumn={false}
+          onRowClick={onRowClick}
         />
       );
-      expect(container.querySelector(".fa-custom-add")).toBeInTheDocument();
-    });
-  });
-
-  describe("modal and selection", () => {
-    it("lists unselected columns", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderMobile(<MobileHarness />);
-      await user.click(container.querySelector(".fa-plus"));
-      expect(await screen.findByText("Location")).toBeInTheDocument();
+      await user.click(screen.getByText("Alex"));
+      await waitFor(() => expect(onRowClick).toHaveBeenCalledTimes(1));
+      const [clickedRow, clickedIndex] = onRowClick.mock.calls[0];
+      expect(clickedIndex).toBe(1);
+      expect(clickedRow).toMatchObject({ data: { name: "Alex", age: "28" }, order: 1 });
     });
 
-    it("lists the action column when enabled but not shown", async () => {
+    it("preserves existing row order", async () => {
       const user = userEvent.setup();
-      // maxMobileColumns=1 forces action column to be hidden despite the flag.
-      const { container } = await renderMobile(
-        <MobileHarness useActionsColumn actionColumn={stableActionColumn} maxMobileColumns={1} />
+      const onRowClick = vi.fn();
+      render(
+        <Table
+          columns={baseColumns()}
+          rowData={[{ data: { name: "Taylor", age: "32" }, order: 99 }]}
+          useActionsColumn={false}
+          onRowClick={onRowClick}
+        />
       );
-      expect(screen.queryByText("Actions")).not.toBeInTheDocument();
-      await user.click(container.querySelector("thead .fa-bars"));
-      expect(await screen.findAllByText(/Actions/)).not.toHaveLength(0);
+      await user.click(screen.getByText("Taylor"));
+      await waitFor(() => expect(onRowClick).toHaveBeenCalledTimes(1));
+      const [clickedRow] = onRowClick.mock.calls[0];
+      expect(clickedRow).toMatchObject({ order: 99 });
     });
 
-    it("offers Remove options when >1 selected", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderMobile(<MobileHarness />);
-      await user.click(container.querySelector("thead .fa-bars"));
-      expect(await screen.findAllByText(/Remove/)).not.toHaveLength(0);
-    });
-
-    it("selection swaps flags by mapto, calls setColumns, closes modal", async () => {
-      const user = userEvent.setup();
-      const onColumnsSet = vi.fn();
-      const { container } = await renderMobile(<MobileHarness onColumnsSet={onColumnsSet} />);
-      await user.click(container.querySelector(".fa-plus"));
-      await user.click(await screen.findByText("Location"));
-
-      await waitFor(() => expect(screen.getAllByText("Location").length).toBeGreaterThan(0));
-      const last = onColumnsSet.mock.calls.at(-1)[0];
-      expect(last.find((c) => c.mapto === "location").selected).toBe(true);
-      expect(headerNames(container)).toContain("Location");
-    });
-
-    it("can be reopened after closing", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderMobile(<MobileHarness maxMobileColumns={5} />);
-      await user.click(container.querySelector(".fa-plus"));
-      await user.click(await screen.findByText("Location"));
-      await user.click(container.querySelector("thead .fa-bars"));
-      expect(await screen.findAllByText(/Remove/)).not.toHaveLength(0);
-    });
-
-    it("does not mutate columns", async () => {
-      const user = userEvent.setup();
-      const frozen = threeColumns().map((c) => Object.freeze({ ...c }));
-      const { container } = await renderMobile(<MobileHarness initialColumns={frozen} />);
-      await user.click(container.querySelector(".fa-plus"));
-      expect(frozen.every((c) => !("selected" in c))).toBe(true);
-    });
-  });
-
-  describe("sorting", () => {
-    it("default sort works in mobile", async () => {
-      const user = userEvent.setup();
-      const { container } = await renderMobile(<DefaultSortHarness />);
-      await user.click(screen.getByText("Name"));
-      const names = [...container.querySelectorAll("tbody tr")].map(
-        (tr) => tr.querySelector("td").textContent
+    it("missing values empty, objects as JSON", () => {
+      const { container } = render(
+        <Table columns={baseColumns()} rowData={[{ data: { name: { nested: true } } }]} useActionsColumn={false} />
       );
-      expect(names).toEqual(["Alice", "Bob", "Charlie"]);
-      expect(screen.getByText("Name").closest("th").querySelector(".fa-caret-up")).toBeInTheDocument();
+      const cells = container.querySelectorAll("tbody tr td");
+      expect(cells[0].textContent).toBe(JSON.stringify({ nested: true }));
+      expect(cells[1].textContent).toBe("");
+    });
+
+    it("applies even/odd default styles", () => {
+      const { container } = render(
+        <Table columns={baseColumns()} rowData={[{ data: { name: "A" } }, { data: { name: "B" } }]} />
+      );
+      const rows = container.querySelectorAll("tbody tr");
+      expect(rows[0]).toHaveStyle("background-color: rgb(249, 249, 249)");
+      expect(rows[1]).toHaveStyle("background-color: rgb(255, 255, 255)");
+    });
+
+    it("applies selected row style after click", async () => {
+      const user = userEvent.setup();
+      const { container } = render(<Table columns={baseColumns()} rowData={baseRows()} />);
+      await user.click(screen.getByText("Taylor"));
+      expect(container.querySelector("tbody tr")).toHaveStyle("background-color: rgb(217, 237, 247)");
+    });
+
+    it("applies textClassName", () => {
+      const { container } = render(
+        <Table columns={baseColumns()} rowData={baseRows()} textClassName="cell-text" textStyle={{ color: "red" }} />
+      );
+      expect(container.querySelector(".cell-text")).toBeInTheDocument();
     });
   });
 });
