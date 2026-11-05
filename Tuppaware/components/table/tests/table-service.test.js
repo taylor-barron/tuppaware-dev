@@ -22,11 +22,6 @@ import {
   useEmitColumnChanges,
 } from "../table-service";
 
-// ---------------------------------------------------------------------------
-// Local fixtures — do NOT import from table-test-utils so this file stays
-// dependency-free (apart from renderHook for the one hook test) and can run
-// in isolation.
-// ---------------------------------------------------------------------------
 const threeColumns = () => [
   { name: "Name", mapto: "name" },
   { name: "Age", mapto: "age" },
