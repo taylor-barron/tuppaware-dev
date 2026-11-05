@@ -140,6 +140,17 @@ export default function TableMobile({
     setShowModal(false);
   };
 
+  useLayoutEffect(() => {
+    if (!useActionsColumn) {
+      setShowActionColumn((prev) => (prev === false ? prev : false));
+      return;
+    }
+    const selectedTotal = columns.filter((c) => c.selected === true).length;
+    const canShow = selectedTotal < (maxMobileColumns ?? columns.length);
+    setShowActionColumn((prev) => (prev === canShow ? prev : canShow));
+    
+  }, [columns, useActionsColumn, maxMobileColumns]);
+
   const canAddColumn = showActionColumn ? selectedCount < (maxMobileColumns ?? columns.length) - 1 : selectedCount < (maxMobileColumns ?? columns.length);
 
   return (
@@ -153,14 +164,14 @@ export default function TableMobile({
             <tr>
               {columns.map((column, columnIndex) => column.selected ? (
                 <th key={columnIndex} className={tableHeadCellClassName} style={getHeaderStyle(columnIndex)}>
-                  <FlexBox direction="row" horizontal="space-between" style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }}>
+                  <FlexBox direction="row" horizontal="space-between" style={{ cursor: "pointer", backgroundColor: tableHeadBackgroundStyle }} onClick={() => onColumnSort(columnIndex)}>
                     <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle}}>
                       <Icon className={columnSelectIconClass} style={{ marginRight: "0.75rem" }} onClick={() => {columnSelect(column.mapto)}} />
 
                       <Header className={headerClassName} style={headerStyleObject}>{column.name}</Header>
                     </FlexBox>
 
-                    <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }} onClick={() => onColumnSort(columnIndex)}>
+                    <FlexBox direction="row" horizontal="space-between" vertical="center" style={{ backgroundColor: tableHeadBackgroundStyle }}>
                       {column.sort === SORT_ASC && <Icon className={sortAscendingIcon} />}
                       {column.sort === SORT_DESC && <Icon className={sortDescendingIcon} />}
                       {(column.sort === SORT_NONE || column.sort == null || column.sort === undefined) && <Icon className={unsortedIcon} />}
