@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Table from "../table";
 import {
@@ -12,6 +12,17 @@ import {
   threeColumns,
   useTableTestEnvironment,
 } from "./table-test-utils";
+
+const headerOf = (name) => screen.getByText(name).closest("th");
+
+const sortIconOf = (name) => {
+  const th = headerOf(name);
+  return (
+    th.querySelector(".fa-caret-up") ||
+    th.querySelector(".fa-caret-down") ||
+    th.querySelector(".fa-sort")
+  );
+};
 
 describe("table-mobile.jsx", () => {
   useTableTestEnvironment();
@@ -68,21 +79,56 @@ describe("table-mobile.jsx", () => {
       expect(screen.queryByText("Actions")).not.toBeInTheDocument();
     });
 
-    it("clicking a header calls onColumnSort(columnIndex)", async () => {
+    it("clicking the sort icon calls onColumnSort(columnIndex)", async () => {
       const user = userEvent.setup();
       const onColumnSort = vi.fn();
       await renderMobile(<MobileHarness onColumnSort={onColumnSort} />);
-      await user.click(screen.getByText("Age"));
+
+      await user.click(sortIconOf("Age"));
       expect(onColumnSort).toHaveBeenCalledWith(1);
+    });
+
+    it("clicking the sort icon in a sorted column calls onColumnSort with that column", async () => {
+      const user = userEvent.setup();
+      const onColumnSort = vi.fn();
+      await renderMobile(
+        <MobileHarness
+          initialColumns={[
+            { name: "Name", mapto: "name", selected: true, sort: "asc" },
+            { name: "Age", mapto: "age", selected: true },
+          ]}
+          onColumnSort={onColumnSort}
+        />
+      );
+
+      const icon = headerOf("Name").querySelector(".fa-caret-up");
+      expect(icon).toBeInTheDocument();
+      await user.click(icon);
+      expect(onColumnSort).toHaveBeenCalledWith(0);
+    });
+
+    it("clicking the column-select icon does not sort", async () => {
+      const user = userEvent.setup();
+      const onColumnSort = vi.fn();
+      const { container } = await renderMobile(<MobileHarness onColumnSort={onColumnSort} />);
+
+      const selectIcon = container.querySelector("thead .fa-bars");
+      expect(selectIcon).toBeInTheDocument();
+      await user.click(selectIcon);
+
+      expect(onColumnSort).not.toHaveBeenCalled();
     });
 
     it("uses columnSelectIconClass", async () => {
       const { container } = await renderMobile(
-        <MobileHarness initialColumns={baseColumns()} rowData={baseRows()} columnSelectIconClass="fa fa-custom-select" />
+        <MobileHarness
+          initialColumns={baseColumns()}
+          rowData={baseRows()}
+          columnSelectIconClass="fa fa-custom-select"
+        />,
+        ".fa-custom-select"
       );
-      await waitFor(() =>
-        expect(container.querySelectorAll(".fa-custom-select").length).toBeGreaterThan(0)
-      );
+      expect(container.querySelector(".fa-custom-select")).toBeInTheDocument();
     });
   });
 
@@ -217,15 +263,37 @@ describe("table-mobile.jsx", () => {
   });
 
   describe("sorting", () => {
-    it("default sort works in mobile", async () => {
+    it("default sort works in mobile when the sort icon is clicked", async () => {
       const user = userEvent.setup();
       const { container } = await renderMobile(<DefaultSortHarness />);
-      await user.click(screen.getByText("Name"));
+
+      expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
+      await user.click(sortIconOf("Name"));
+
       const names = [...container.querySelectorAll("tbody tr")].map(
         (tr) => tr.querySelector("td").textContent
       );
       expect(names).toEqual(["Alice", "Bob", "Charlie"]);
-      expect(screen.getByText("Name").closest("th").querySelector(".fa-caret-up")).toBeInTheDocument();
+      expect(headerOf("Name").querySelector(".fa-caret-up")).toBeInTheDocument();
+    });
+
+    it("cycles icon and order: asc → desc → none", async () => {
+      const user = userEvent.setup();
+      const { container } = await renderMobile(<DefaultSortHarness />);
+      const names = () =>
+        [...container.querySelectorAll("tbody tr")].map((tr) => tr.querySelector("td").textContent);
+
+      await user.click(sortIconOf("Name"));
+      expect(names()).toEqual(["Alice", "Bob", "Charlie"]);
+      expect(headerOf("Name").querySelector(".fa-caret-up")).toBeInTheDocument();
+
+      await user.click(headerOf("Name").querySelector(".fa-caret-up"));
+      expect(names()).toEqual(["Charlie", "Bob", "Alice"]);
+      expect(headerOf("Name").querySelector(".fa-caret-down")).toBeInTheDocument();
+
+      await user.click(headerOf("Name").querySelector(".fa-caret-down"));
+      expect(names()).toEqual(["Charlie", "Alice", "Bob"]);
+      expect(headerOf("Name").querySelector(".fa-sort")).toBeInTheDocument();
     });
   });
 });
