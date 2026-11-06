@@ -1,9 +1,5 @@
 "use client";
 
-// TODO: throw errors for invalid states like true for both buttons or "actionColumn" being used as a mapTo, order key?,
-// TODO: update tests
-// TODO: update documentation
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { replaceDefaults } from "../../../utils/replacedefaults";
 import useIsBelowBreakPoint from "../../../utils/watchmobilebreakpoint";
@@ -111,7 +107,6 @@ export default function Table({
 
 }) {
   const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
-  // const shouldBeMobile = true;
 
   const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
   const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);

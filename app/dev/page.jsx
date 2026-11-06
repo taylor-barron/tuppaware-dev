@@ -19,10 +19,10 @@ import DualPickList from '../../Tuppaware/components/dualpicklist';
 
 export default function DevContainer() {
   const [columns, setColumns] = useState([
-    { name: "Name", mapto: "name", length: 150, index: 0 },
-    { name: "Age", mapto: "age", index: 1 },
-    { name: "Location", mapto: "location", index: 2 },
-    { name: "Email", mapto: "email", index: 3 },
+    { name: "Name", mapto: "name", length: 150 },
+    { name: "Age", mapto: "age" },
+    { name: "Location", mapto: "location" },
+    { name: "Email", mapto: "email" },
   ]);
 
   const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
@@ -64,43 +64,16 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
-
-        <VerticalList
-          listItems={[{ name: "Item 1" }, { name: "Item 2" }, { name: "Item 3" }]}
-          onSelection={(item) => { console.log(`Selected: ${item.name}`); }}
-        />
-
-        <Modal
-          isOpen={false}
-          headerText="Example Modal"
-          useCloseIcon={true}
-          onClose={() => { console.log("Modal closed"); }}
-        >
-          <p>This is the content of the modal.</p>
-        </Modal>
-
-        {/* need to do sorting */}
-        {/* need to set up icons for sorting */}
-        {/* need to test no button */}
-        {/* need to test default mobile columns and selected mobile columns */}
+        
         <Table
           tableStyle={{ width: "90%" }}
           columns={columns}
           setColumns={setColumns}
           actionColumn={actionColumn}
-          // onColumnsChange={({ columns: nextColumns }) => {
-          //   setColumns(nextColumns);
-          // }}
 
           useActionsColumn={true}
           // useDropdownButton={true}
           useActionButton={true}
-
-          // onColumnSort={(columnIndex) => {
-          //   const nextColumns = updateColumns(columns, columnIndex);
-          //   setColumns(nextColumns);
-          //   setRows(sortRows(rows, nextColumns, columnIndex));
-          // }}
 
           cascadeResize={true}
 
@@ -111,10 +84,6 @@ export default function DevContainer() {
             alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(columns)} clicked: ${JSON.stringify(actionColumn)}`);
           }}
 
-          actionFunction={(rowData, rowIndex) => {
-            alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(actionColumn)}`);
-          }}
-          
           actionButtonData={{
             text: "Review",
             leadingIconClassName: "fa fa-eye",
@@ -171,6 +140,20 @@ export default function DevContainer() {
             urlElementClassName: "",
           }}
         />
+
+        <VerticalList
+          listItems={[{ name: "Item 1" }, { name: "Item 2" }, { name: "Item 3" }]}
+          onSelection={(item) => { console.log(`Selected: ${item.name}`); }}
+        />
+
+        <Modal
+          isOpen={false}
+          headerText="Example Modal"
+          useCloseIcon={true}
+          onClose={() => { console.log("Modal closed"); }}
+        >
+          <p>This is the content of the modal.</p>
+        </Modal>
 
         <Button onClick={() => alert(columns ? JSON.stringify(columns) : "No columns")} leadingIconClassName='fa fa-check'>Click Me</Button>
 
