@@ -1,8 +1,10 @@
-import { useCallback, useLayoutEffect } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 
 export const SORT_ASC = "asc";
 export const SORT_DESC = "desc";
 export const SORT_NONE = "none";
+
+export const ACTION_COLUMN_MAPTO = "actionColumn";
 
 export function useEmitColumnChanges(
   columns,
@@ -11,18 +13,38 @@ export function useEmitColumnChanges(
   onColumnsChange,
   lastEmittedSignatureRef
 ) {
+  // Hold the latest values in refs so the returned callback has stable
+  // identity across renders. Without this, the callback is recreated on
+  // every render (because `columns` is typically a fresh array), which
+  // makes downstream `useCallback` hooks (handleResize, stopResize) unstable
+  // and causes the unmount-cleanup effect in <Table> to tear down drag
+  // listeners mid-drag.
+  const columnsRef = useRef(columns);
+  columnsRef.current = columns;
+  const actionColumnRef = useRef(actionColumn);
+  actionColumnRef.current = actionColumn;
+  const useActionsColumnRef = useRef(useActionsColumn);
+  useActionsColumnRef.current = useActionsColumn;
+  const onColumnsChangeRef = useRef(onColumnsChange);
+  onColumnsChangeRef.current = onColumnsChange;
+
   return useCallback(
     (widths) => {
-      const nextColumns = columns.map((column, idx) => {
+      const cols = columnsRef.current;
+      const actCol = actionColumnRef.current;
+      const withActions = useActionsColumnRef.current;
+      const onChanges = onColumnsChangeRef.current;
+
+      const nextColumns = cols.map((column, idx) => {
         const nextLength = widths[idx];
         if (!column || !Number.isFinite(nextLength) || nextLength <= 0) return column;
         return column.length === nextLength ? column : { ...column, length: nextLength };
       });
 
       const nextActionColumn =
-        useActionsColumn && Number.isFinite(widths[columns.length]) && widths[columns.length] > 0
-          ? { ...actionColumn, length: widths[columns.length] }
-          : actionColumn;
+        withActions && Number.isFinite(widths[cols.length]) && widths[cols.length] > 0
+          ? { ...actCol, length: widths[cols.length] }
+          : actCol;
 
       const nextSignature = JSON.stringify({
         columns: nextColumns.map((c) => c?.length ?? null),
@@ -32,12 +54,12 @@ export function useEmitColumnChanges(
       if (nextSignature === lastEmittedSignatureRef.current) return;
       lastEmittedSignatureRef.current = nextSignature;
 
-      onColumnsChange({
+      onChanges({
         columns: nextColumns,
         actionColumn: nextActionColumn,
       });
     },
-    [actionColumn, columns, onColumnsChange, useActionsColumn, lastEmittedSignatureRef]
+    [lastEmittedSignatureRef]
   );
 }
 
@@ -127,7 +149,14 @@ export function useInitializeColumnWidths({
   ]);
 }
 
-export function handleResizeEvent(event, resizeStateRef, minColWidth, latestWidthsRef, setColumnWidths) {
+export function handleResizeEvent(
+  event,
+  resizeStateRef,
+  minColWidth,
+  latestWidthsRef,
+  setColumnWidths,
+  cascadeResize = false
+) {
   const state = resizeStateRef.current;
   if (!state) return;
 
@@ -137,13 +166,46 @@ export function handleResizeEvent(event, resizeStateRef, minColWidth, latestWidt
   if (leftStart == null || rightStart == null) return;
 
   const delta = event.clientX - startX;
-  const maxGrow = rightStart - minColWidth;
-  const maxShrink = leftStart - minColWidth;
-  const appliedDelta = Math.max(-maxShrink, Math.min(delta, maxGrow));
-
   const next = [...startWidths];
-  next[index] = leftStart + appliedDelta;
-  next[index + 1] = rightStart - appliedDelta;
+
+  if (cascadeResize && delta > 0) {
+    let available = 0;
+    for (let i = index + 1; i < startWidths.length; i += 1) {
+      available += Math.max(0, startWidths[i] - minColWidth);
+    }
+
+    const applied = Math.min(delta, available);
+    next[index] = leftStart + applied;
+
+    let remaining = applied;
+    for (let i = index + 1; i < startWidths.length && remaining > 0; i += 1) {
+      const take = Math.min(remaining, Math.max(0, startWidths[i] - minColWidth));
+      next[i] = startWidths[i] - take;
+      remaining -= take;
+    }
+  } else if (cascadeResize && delta < 0) {
+    let available = 0;
+    for (let i = index; i >= 0; i -= 1) {
+      available += Math.max(0, startWidths[i] - minColWidth);
+    }
+
+    const applied = Math.min(-delta, available);
+    next[index + 1] = rightStart + applied;
+
+    let remaining = applied;
+    for (let i = index; i >= 0 && remaining > 0; i -= 1) {
+      const take = Math.min(remaining, Math.max(0, startWidths[i] - minColWidth));
+      next[i] = startWidths[i] - take;
+      remaining -= take;
+    }
+  } else {
+    const maxGrow = rightStart - minColWidth;
+    const maxShrink = leftStart - minColWidth;
+    const appliedDelta = Math.max(-maxShrink, Math.min(delta, maxGrow));
+
+    next[index] = leftStart + appliedDelta;
+    next[index + 1] = rightStart - appliedDelta;
+  }
 
   latestWidthsRef.current = next;
   setColumnWidths(next);
@@ -290,9 +352,6 @@ export function ensureRowsHaveOrder(rows = [], rowOrderKey = "order") {
   });
 }
 
-/**
- * not used by default, must be incorporated manually
- */
 export function sortRows(rows = [], columns = [], columnIndex) {
   if (!Array.isArray(rows)) return [];
   if (!Array.isArray(columns)) return [];
@@ -302,16 +361,18 @@ export function sortRows(rows = [], columns = [], columnIndex) {
     rows = rows.map((row, index) => ({ ...row, originalOrder: index }));
   }
 
+  const mapTo = columns[columnIndex]?.mapto;
+
   const currentSort = columns[columnIndex]?.sort;
-  if (currentSort === SORT_NONE) {
+  if (currentSort === SORT_NONE || currentSort == undefined) {
     return rows
       .map((row) => ({ ...row, order: row.originalOrder }))
       .sort((a, b) => a.originalOrder - b.originalOrder);
 
   } else if (currentSort === SORT_ASC) {
     return rows.map((row) => ({ ...row })).sort((a, b) => {
-      const aValue = a.data[columnIndex];
-      const bValue = b.data[columnIndex];
+      const aValue = a.data[mapTo];
+      const bValue = b.data[mapTo];
       if (aValue < bValue) return -1;
       if (aValue > bValue) return 1;
       return 0;
@@ -319,8 +380,8 @@ export function sortRows(rows = [], columns = [], columnIndex) {
 
   } else if (currentSort === SORT_DESC) {
     return rows.map((row) => ({ ...row })).sort((a, b) => {
-      const aValue = a.data[columnIndex];
-      const bValue = b.data[columnIndex];
+      const aValue = a.data[mapTo];
+      const bValue = b.data[mapTo];
       if (aValue > bValue) return -1;
       if (aValue < bValue) return 1;
       return 0;
@@ -332,9 +393,18 @@ export function sortRows(rows = [], columns = [], columnIndex) {
   }
 }
 
-/**
- * order of update: SORT_NONE -> SORT_ASC -> SORT_DESC -> SORT_NONE
-*/
+export function numberRows(rows = []) {
+  if (!Array.isArray(rows)) return [];
+
+  let counter = 0;
+  for (let i = 0; i < rows.length; i++) {
+    rows[i].order = counter;
+    counter++;
+  }
+
+  return rows;
+}
+
 export function updateColumns(columns = [], columnIndex) {
   if (!Array.isArray(columns)) return [];
 
@@ -355,7 +425,6 @@ export function updateColumns(columns = [], columnIndex) {
   return columns.map((column, index) => {
     if (index === columnIndex) {
       return { ...column, sort: nextSort };
-
     } else {
       return { ...column, sort: SORT_NONE };
     }
@@ -364,4 +433,43 @@ export function updateColumns(columns = [], columnIndex) {
 
 export function getHeaderBackgroundColor(tableHeadStyleObject) {
   return tableHeadStyleObject?.backgroundColor || "transparent";
+}
+
+export function selectColumns(columns = [], actionColumnIncluded = false, selected = null, removed = null) {
+  if (!Array.isArray(columns)) return [];
+
+  const selectedCount = columns.filter(
+    (column) => column?.selected === true
+  ).length;
+
+  return columns.map((column, position) => {
+    let isSelected = column?.selected === true;
+
+    if (selected !== null && position === selected) isSelected = true;
+    if (removed !== null && position === removed) isSelected = false;
+
+    if (selected === null && removed === null && selectedCount === 0) {
+      if (position === 0 || (position === 1 && !actionColumnIncluded)) isSelected = true;
+    }
+
+    return { ...column, selected: isSelected };
+  });
+}
+
+export function computeInitiallyShowActionColumn(useActionsColumn, actionColumn, maxMobileColumns, columns) {
+  if (!useActionsColumn) return false;
+  if (!actionColumn) return false;
+  if (!Array.isArray(columns)) return false;
+
+  const selectedCount = columns.filter((column) => column.selected === true).length;
+  return selectedCount < (maxMobileColumns ?? columns.length);
+}
+
+export function defaultOnColumnSort(columnIndex, columns = [], rowData = [], setColumns = () => {}, setRows = () => {}) {
+  const updatedColumns = updateColumns(columns, columnIndex);
+  setColumns(updatedColumns);
+
+  const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
+  const updatedRows = numberRows(reorderedRows);
+  setRows(updatedRows);
 }

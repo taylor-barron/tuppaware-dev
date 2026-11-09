@@ -2,34 +2,37 @@
 
 import { useState } from 'react';
 
-import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from '../../Tuppaware/components/table/table-service';
+import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from '../../Tuppaware/components/table/utils/table-service';
 import Button from '../../Tuppaware/buttons/button';
 import DropdownButton from '../../Tuppaware/buttons/dropdownbutton';
 import FlexBox from '../../Tuppaware/containers/flexbox';
 import Header from '../../Tuppaware/text/header';
 import Nav from '../../Tuppaware/components/nav';
-import Table from '../../Tuppaware/components/table/table';
+import Table from '../../Tuppaware/components/table/src/table';
 import Text from '../../Tuppaware/text/text';
 import TextInput from '../../Tuppaware/inputs/textinput';
 import TuppawareLogo from '../../public/tuppaware.png';
+import Modal from '../../Tuppaware/modals/modal';
+import VerticalList from '../../Tuppaware/components/list/verticallist';
 
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
 export default function DevContainer() {
   const [columns, setColumns] = useState([
-    { name: "Name", length: 150 },
-    { name: "Age" },
-    { name: "Location" },
+    { name: "Name", mapto: "name", length: 150 },
+    { name: "Age", mapto: "age" },
+    { name: "Location", mapto: "location" },
+    { name: "Email", mapto: "email" },
   ]);
 
-  const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
+  const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 275 });
 
   const [rows, setRows] = useState([
-    { data: ["John Doe", 30, "New York"], selected: true },
-    { data: ["Jane Smith", 25, "Los Angeles"], selected: false },
-    { data: ["Sam Johnson", 35, "Chicago"], selected: false },
-    { data: ["Emily Davis", 28, "Houston"], selected: false },
-    { data: ["Michael Brown", 32, "Phoenix"], selected: false },
+    { data: { name: "John Doe", age: 30, location: "New York", email: "john@example.com" }, selected: false },
+    { data: { name: "Jane Smith", age: 25, location: "Los Angeles", email: "jane@example.com" }, selected: false },
+    { data: { name: "Sam Johnson", age: 35, location: "Chicago", email: "sam@example.com" }, selected: false },
+    { data: { name: "Emily Davis", age: 28, location: "Houston", email: "emily@example.com" }, selected: false },
+    { data: { name: "Michael Brown", age: 32, location: "Phoenix", email: "michael@example.com" }, selected: false },
   ]);
 
   return (
@@ -61,36 +64,26 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
-        {/* need to do sorting */}
-        {/* need to set up icons for sorting */}
-        {/* need to test no button */}
-        {/* need to test default mobile columns and selected mobile columns */}
+        
         <Table
-          tableStyle={{ margin: "5rem", width: "90%" }}
+          tableStyle={{ width: "90%" }}
           columns={columns}
+          setColumns={setColumns}
           actionColumn={actionColumn}
-          onColumnsChange={({ columns: nextColumns, actionColumn: nextActionColumn }) => {
-            setColumns(nextColumns);
-            setActionColumn(nextActionColumn);
-          }}
 
-          onColumnSort={(columnIndex) => {
-            const nextColumns = updateColumns(columns, columnIndex);
-            setColumns(nextColumns);
-            setRows(sortRows(rows, nextColumns, columnIndex));
-          }}
+          useActionsColumn={true}
+          useDropdownButton={true}
+          // useActionButton={true}
+
+          cascadeResize={true}
 
           rowData={rows}
+          setRows={setRows}
 
           onRowClick={(rowData, rowIndex) => {
             alert(`Row ${rowIndex + 1} clicked: ${JSON.stringify(columns)} clicked: ${JSON.stringify(actionColumn)}`);
           }}
 
-          useDropdownButton={true}
-          actionFunction={(rowData, rowIndex) => {
-            alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(actionColumn)}`);
-          }}
-          
           actionButtonData={{
             text: "Review",
             leadingIconClassName: "fa fa-eye",
@@ -148,7 +141,21 @@ export default function DevContainer() {
           }}
         />
 
-        <Button onClick={() => alert('Button clicked!')} leadingIconClassName='fa fa-check'>Click Me</Button>
+        <VerticalList
+          listItems={[{ name: "Item 1" }, { name: "Item 2" }, { name: "Item 3" }]}
+          onSelection={(item) => { console.log(`Selected: ${item.name}`); }}
+        />
+
+        <Modal
+          isOpen={false}
+          headerText="Example Modal"
+          useCloseIcon={true}
+          onClose={() => { console.log("Modal closed"); }}
+        >
+          <p>This is the content of the modal.</p>
+        </Modal>
+
+        <Button onClick={() => alert(columns ? JSON.stringify(columns) : "No columns")} leadingIconClassName='fa fa-check'>Click Me</Button>
 
         <DropdownButton onButtonClick={() => alert('Dropdown Button clicked!')} dropdownItems={[
           { title: "Option 1 and like a whole lot of other stuff", action: () => alert("Option 1 clicked") },
