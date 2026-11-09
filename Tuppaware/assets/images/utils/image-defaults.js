@@ -1,0 +1,1 @@
+export const DEFAULT_IMAGE_STYLE = { width: "100%", height: "auto" };
