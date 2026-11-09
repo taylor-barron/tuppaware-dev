@@ -10,7 +10,6 @@ import {
   renderMobile,
   setViewportWidth,
   useTableTestEnvironment,
-
 } from "./table-test-utils";
 
 describe("table.jsx", () => {
@@ -97,19 +96,23 @@ describe("table.jsx", () => {
       expect(container.querySelector("tbody tr")).toHaveStyle("background-color: rgb(249, 249, 249)");
     });
 
-    it("default*Style props replace defaults", () => {
+    it("merges *Style overrides on top of the DEFAULT_* base; no prop can remove a base key", () => {
       const { container } = render(
         <Table
           columns={baseColumns()}
           rowData={baseRows()}
-          defaultTableStyle={{ width: "50%" }}
-          defaultTableHeadStyle={{ textAlign: "right" }}
-          defaultEvenRowStyle={{ backgroundColor: "rgb(1, 2, 3)" }}
+          tableStyle={{ width: "50%" }}
+          tableHeadStyle={{ textAlign: "right" }}
+          evenRowStyle={{ backgroundColor: "rgb(1, 2, 3)" }}
         />
       );
-      expect(screen.getByRole("table").style.borderCollapse).toBe("");
+
+      expect(screen.getByRole("table")).toHaveStyle("width: 50%");
       expect(container.querySelector("thead")).toHaveStyle("text-align: right");
       expect(container.querySelector("tbody tr")).toHaveStyle("background-color: rgb(1, 2, 3)");
+
+      expect(screen.getByRole("table").style.borderCollapse).toBe("collapse");
+      expect(container.querySelector("thead").style.backgroundColor).toBe("rgb(242, 242, 242)");
     });
 
     it("className props applied", () => {
@@ -369,7 +372,6 @@ describe("table.jsx", () => {
       const { container } = render(
         <Table columns={baseColumns()} rowData={baseRows()} onColumnsChange={onColumnsChange} />
       );
-
       await waitFor(() => expect(onColumnsChange).toHaveBeenCalled());
       onColumnsChange.mockClear();
 

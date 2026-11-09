@@ -464,3 +464,12 @@ export function computeInitiallyShowActionColumn(useActionsColumn, actionColumn,
   const selectedCount = columns.filter((column) => column.selected === true).length;
   return selectedCount < (maxMobileColumns ?? columns.length);
 }
+
+export function defaultOnColumnSort(columnIndex, columns = [], rowData = [], setColumns = () => {}, setRows = () => {}) {
+  const updatedColumns = updateColumns(columns, columnIndex);
+  setColumns(updatedColumns);
+
+  const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
+  const updatedRows = numberRows(reorderedRows);
+  setRows(updatedRows);
+}

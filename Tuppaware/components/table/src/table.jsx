@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { replaceDefaults } from "../../../utils/replacedefaults";
 import useIsBelowBreakPoint from "../../../utils/watchmobilebreakpoint";
+
 import {
   useEmitColumnChanges,
   getMeasuredWidth,
@@ -16,77 +18,74 @@ import {
   getActionCellStyle as getActionCellStyleHelper,
   ensureRowsHaveOrder,
   getHeaderBackgroundColor,
-  updateColumns,
-  sortRows,
-  numberRows,
+  defaultOnColumnSort,
 
 } from "../utils/table-service";
+
+import {
+  EMPTY_ARRAY,
+  EMPTY_STYLE,
+  EMPTY_OBJECT,
+  EMPTY_CLASS_NAME,
+  NOOP,
+  ACTION_COLUMN,
+  DEFAULT_TABLE_STYLE,
+  DEFAULT_TABLE_HEAD_STYLE,
+  DEFAULT_HEADER_STYLE,
+  DEFAULT_TEXT_STYLE,
+  DEFAULT_TABLE_HEAD_CELL_STYLE,
+  DEFAULT_ADD_COLUMN_ICON_STYLE,
+  DEFAULT_ADD_COLUMN_ICON_CONTAINER_STYLE,
+  DEFAULT_ODD_ROW_STYLE,
+  DEFAULT_EVEN_ROW_STYLE,
+  DEFAULT_SELECTED_ROW_STYLE
+
+} from "../utils/table-defaults";
+
 import TableDesktop from "./table-desktop";
 import TableMobile from "./table-mobile";
-
-const NOOP = () => {};
 
 export default function Table({
   writeable = true,
   mobileBreakPoint = 768,
 
-  columns = [],
+  columns = EMPTY_ARRAY,
   setColumns = NOOP,
 
-  rowData = [],
+  rowData = EMPTY_ARRAY,
   setRows = NOOP,
 
   onColumnsChange = NOOP,
-  onColumnSort = (columnIndex) => {
-    const updatedColumns = updateColumns(columns, columnIndex);
-    setColumns(updatedColumns);
-
-    const reorderedRows = sortRows(rowData, updatedColumns, columnIndex);
-    const updatedRows = numberRows(reorderedRows);
-    setRows(updatedRows);
-  },
+  onColumnSort = (columnIndex) => { defaultOnColumnSort(columnIndex, columns, rowData, setColumns, setRows); },
   onRowClick = NOOP,
 
   useActionsColumn = false,
   actionColWidth = 140,
-  actionColumn = { name: "Actions" },
+  actionColumn = ACTION_COLUMN,
   useActionButton = false,
-  actionButtonData = {},
+  actionButtonData = EMPTY_STYLE,
   useDropdownButton = false,
-  dropdownButtonData = {},
+  dropdownButtonData = EMPTY_OBJECT,
 
-  tableClassName = "",
-  tableStyle = {},
-  defaultTableStyle = { maxWidth: "100%", width: "100%", borderCollapse: "collapse", border: "1px 1px 0 0 solid #ddd", fontFamily: "system-ui" },
+  tableClassName = EMPTY_CLASS_NAME,
+  tableStyle = EMPTY_STYLE,
 
-  tableHeadClassName = "",
-  tableHeadStyle = {},
-  defaultTableHeadStyle = { backgroundColor: "#f2f2f2", textAlign: "left", fontFamily: "system-ui" },
+  tableHeadClassName = EMPTY_CLASS_NAME,
+  tableHeadStyle = EMPTY_STYLE,
 
-  headerClassName = "",
-  headerStyle = {},
-  defaultHeaderStyle = { fontFamily: "system-ui", margin: 0, fontSize: "inherit", fontWeight: "inherit" },
+  headerClassName = EMPTY_CLASS_NAME,
+  headerStyle = EMPTY_STYLE,
 
-  textClassName = "",
-  textStyle = {},
-  defaultTextStyle = { fontFamily: "system-ui", margin: 0, fontSize: "inherit", fontWeight: "inherit" },
+  textClassName = EMPTY_CLASS_NAME,
+  textStyle = EMPTY_STYLE,
 
-  tableHeadCellClassName = "",
-  tableHeadCellStyle = {},
-  defaultTableHeadCellStyle = { margin: 0, paddingLeft: "8px", borderBottom: "1px solid #ddd", fontFamily: "system-ui" },
+  tableHeadCellClassName = EMPTY_CLASS_NAME,
+  tableHeadCellStyle = EMPTY_STYLE,
 
   columnSelectIconClass = "fa fa-bars",
   columnAddIconClass = "fa fa-plus",
-  defaultAddColumnIconStyle = {},
-  addColumnIconStyle = {},
-  addColumnIconContainerStyle = {},
-  defaultAddColumnIconContainerStyle = {
-    borderRadius: "0 8px 8px 0",
-    padding: "6px 4px",
-    cursor: "pointer",
-    alignSelf: "flex-start",
-    backgroundColor: "#f2f2f2",
-  },
+  addColumnIconStyle = EMPTY_STYLE,
+  addColumnIconContainerStyle = EMPTY_STYLE,
   maxMobileColumns = 3,
 
   rowOrderKey = "order",
@@ -94,12 +93,9 @@ export default function Table({
   cascadeResize = false,
 
   showSelected = true,
-  oddRowStyle = {},
-  evenRowStyle = {},
-  defaultOddRowStyle = { backgroundColor: "#ffffff", fontFamily: "system-ui" },
-  defaultEvenRowStyle = { backgroundColor: "#f9f9f9", fontFamily: "system-ui" },
-  selectedRowStyle = {},
-  defaultSelectedRowStyle = { backgroundColor: "#d9edf7", fontFamily: "system-ui" },
+  oddRowStyle = EMPTY_STYLE,
+  evenRowStyle = EMPTY_STYLE,
+  selectedRowStyle = EMPTY_STYLE,
 
   sortDescendingIcon = "fa fa-caret-down",
   sortAscendingIcon = "fa fa-caret-up",
@@ -108,17 +104,17 @@ export default function Table({
 }) {
   const shouldBeMobile = useIsBelowBreakPoint(mobileBreakPoint);
 
-  const tableStyleObject = replaceDefaults(defaultTableStyle, tableStyle);
-  const tableHeadStyleObject = replaceDefaults(defaultTableHeadStyle, tableHeadStyle);
-  const headerStyleObject = replaceDefaults(defaultHeaderStyle, headerStyle);
-  const tableHeadCellStyleObject = replaceDefaults(defaultTableHeadCellStyle, tableHeadCellStyle);
-  const addColumnIconStyleObject = replaceDefaults(defaultAddColumnIconStyle, addColumnIconStyle);
-  const textStyleObject = replaceDefaults(defaultTextStyle, textStyle);
-  const addColumnIconContainerStyleObject = replaceDefaults(defaultAddColumnIconContainerStyle, addColumnIconContainerStyle);
+  const tableStyleObject = replaceDefaults(DEFAULT_TABLE_STYLE, tableStyle);
+  const tableHeadStyleObject = replaceDefaults(DEFAULT_TABLE_HEAD_STYLE, tableHeadStyle);
+  const headerStyleObject = replaceDefaults(DEFAULT_HEADER_STYLE, headerStyle);
+  const tableHeadCellStyleObject = replaceDefaults(DEFAULT_TABLE_HEAD_CELL_STYLE, tableHeadCellStyle);
+  const addColumnIconStyleObject = replaceDefaults(DEFAULT_ADD_COLUMN_ICON_STYLE, addColumnIconStyle);
+  const textStyleObject = replaceDefaults(DEFAULT_TEXT_STYLE, textStyle);
+  const addColumnIconContainerStyleObject = replaceDefaults(DEFAULT_ADD_COLUMN_ICON_CONTAINER_STYLE, addColumnIconContainerStyle);
   const tableHeadBackgroundStyle = getHeaderBackgroundColor(tableHeadStyleObject);
-  const oddRowStyleObject = replaceDefaults(defaultOddRowStyle, oddRowStyle);
-  const evenRowStyleObject = replaceDefaults(defaultEvenRowStyle, evenRowStyle);
-  const selectedRowStyleObject = replaceDefaults(defaultSelectedRowStyle, selectedRowStyle);
+  const oddRowStyleObject = replaceDefaults(DEFAULT_ODD_ROW_STYLE, oddRowStyle);
+  const evenRowStyleObject = replaceDefaults(DEFAULT_EVEN_ROW_STYLE, evenRowStyle);
+  const selectedRowStyleObject = replaceDefaults(DEFAULT_SELECTED_ROW_STYLE, selectedRowStyle);
 
   const rows = useMemo(() => {
     const sourceRows = Array.isArray(rowData)
