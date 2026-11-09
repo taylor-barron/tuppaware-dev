@@ -25,7 +25,7 @@ export default function DevContainer() {
     { name: "Email", mapto: "email" },
   ]);
 
-  const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 175 });
+  const [actionColumn, setActionColumn] = useState({ name: "Actions", length: 275 });
 
   const [rows, setRows] = useState([
     { data: { name: "John Doe", age: 30, location: "New York", email: "john@example.com" }, selected: false },
@@ -72,8 +72,8 @@ export default function DevContainer() {
           actionColumn={actionColumn}
 
           useActionsColumn={true}
-          // useDropdownButton={true}
-          useActionButton={true}
+          useDropdownButton={true}
+          // useActionButton={true}
 
           cascadeResize={true}
 

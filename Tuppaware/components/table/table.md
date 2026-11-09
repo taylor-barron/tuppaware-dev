@@ -6,6 +6,61 @@ TODO: throw errors for invalid states
 /
 /-----------------------------------------------
 
+writeable: Determines whether any actions can be taken on the table.
+mobileBreakPoint = The point in px where the table will switch between desktop and mobile styling.
+
+columns: Expects the columns data structure.
+setColumns: Passed method that executes at top level to update columns on changes.
+
+rowData: Expects the rows data structure.
+setRows: Passed method that executes at top level to update rows on changes.
+
+onColumnsChange: Resets several parent level data structures, primarily after column resize.
+onColumnSort: Method applied when columns are sorted to update columns and rows using setRows and setColumns.
+onRowClick: Method that is called when a row is clicked and the click is not to the action column.
+
+useActionsColumn: Boolean that determines whether action column is used.
+actionColWidth: In px the starting width of the action column.
+actionColumn: Expects action column data structure.
+useActionButton: Boolean sets whether action button will be used if actions column is enabled. Both useAcitonButton and useDropdownButton cannot be true at the same time.
+actionButtonData: Expects action button data structure if useActionButton is true.
+useDropdownButton: Boolean sets whether dropdown button will be used if actions column is enabled. Both useAcitonButton and useDropdownButton cannot be true at the same time.
+dropdownButtonData: Expects dropdown button data structure if useActionButton is true.
+
+tableClassName: Classes applied to top level of table.
+tableStyle: Styles applied to top level of table.
+
+tableHeadClassName: Classes applied to table head.
+tableHeadStyle: Styles applied to table head.
+
+headerClassName: Classes applied to column headers.
+headerStyle: Styles applied to column headers.
+
+textClassName: Classes applied to text in table cells.
+textStyle: Styles applied to text in table cells.
+
+tableHeadCellClassName: Classes applied to table heads.
+tableHeadCellStyle: Styles applied to table heads.
+
+columnSelectIconClass: Favicon icon class used in mobile table that when clicked allows users to switch displayed columns.
+columnAddIconClass: Favicon icon class used to allow users to add another column in mobile table.
+addColumnIconStyle: Styles applied to icon that allows users to add a column to mobile table.
+addColumnIconContainerStyle: Style container for icon that allows users to add a column to mobile table.
+maxMobileColumns: Integer that sets the maximum allowable columns to display at once for a mobile table.
+
+rowOrderKey: Sets the key that is used to order columns.
+minColWidth: Minimum width in px that a column can be resized to.
+cascadeResize: Boolean value that sets whether resizing columns can take space from columns that are not to the immediate right or left of the resizing column. True allows cascading resize.
+
+showSelected: Boolean that sets whether when a row is clicked it will be highlighted for the user.
+oddRowStyle: Styles applied to odd rows only.
+evenRowStyle: Styles applied to even rows only.
+selectedRowStyle: Styles applied to selected rows only.
+
+sortDescendingIcon: Favicon icon class displayed when column is sorted by descending.
+sortAscendingIcon: Favicon icon class displayed when column is sorted by ascending.
+unsortedIcon: Favicon icon class displayed when column is unsorted.
+
 /-----------------------------------------------
 /
 /  DATA STRUCTURES
@@ -78,7 +133,7 @@ Optional Fields:
 / DROPDOWN BUTTON DATA:
 /-----------------
 
-When using an action button and when dropdown button type is used this data structure determines functionality and display of the buttons on each row.
+When using an action button and when dropdown button type is used this data structure determines functionality and display of the buttons on each row. All passed functions will be applied to the row where the button or dropdown item is clicked.
 
 Example Dropdown Button Data:
   dropdownButtonData={{
@@ -125,11 +180,14 @@ Example Dropdown Button Data:
     urlElementClassName: "",
   }}
 
+Props:
+  Props are identical to props used for <a>dropdown button</a> but contained within one dropdownButtonData object.
+
 /-----------------
 / ACTION BUTTON DATA:
 /-----------------
 
-When using an action button and when action button type is used this data structure determines functionality and display of the buttons on each row.
+When using an action button and when action button type is used this data structure determines functionality and display of the buttons on each row. The onClick function will be applied to the row where the button is clicked.
 
 Example Action Button Data:
   actionButtonData={{
@@ -143,3 +201,6 @@ Example Action Button Data:
       alert(`Action for row ${rowIndex + 1}: ${JSON.stringify(rowData)}`);
     }
   }}
+
+Props:
+  Props are identical to props used for <a>action button</a> but contained in actionButtonData object.

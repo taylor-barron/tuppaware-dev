@@ -60,7 +60,7 @@ export default function Table({
   onRowClick = NOOP,
 
   useActionsColumn = false,
-  actionColWidth = 140,
+  actionColWidth = 250,
   actionColumn = ACTION_COLUMN,
   useActionButton = false,
   actionButtonData = EMPTY_STYLE,
