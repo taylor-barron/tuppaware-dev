@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import useIsBelowBreakPoint from "../watchmobilebreakpoint";
+import useIsBelowBreakPoint from "../src/watchmobilebreakpoint";
 
 describe("useIsBelowBreakPoint", () => {
   let listenersByQuery;

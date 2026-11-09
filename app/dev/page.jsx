@@ -15,6 +15,8 @@ import TuppawareLogo from '../../public/tuppaware.png';
 import Modal from '../../Tuppaware/modals/modal';
 import VerticalList from '../../Tuppaware/components/list/verticallist';
 
+import Image from '../../Tuppaware/assets/images/src/image';
+
 import DualPickList from '../../Tuppaware/components/dualpicklist';
 
 export default function DevContainer() {
@@ -64,6 +66,8 @@ export default function DevContainer() {
       />
 
       <FlexBox className="h-screen" style={{ marginTop: "2rem" }} vertical="top" horizontal="center" direction="column">
+
+        <Image src={TuppawareLogo} alt="Tuppaware Logo" style={{ height: "40px", width: "auto", margin: "0 1rem 0 2rem" }} />
         
         <Table
           tableStyle={{ width: "90%" }}

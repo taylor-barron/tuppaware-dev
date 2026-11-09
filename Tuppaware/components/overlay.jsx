@@ -1,6 +1,6 @@
 "use client";
 
-import { replaceDefaults } from "../utils/replacedefaults";
+import { replaceDefaults } from "../utils/src/replacedefaults";
 import Flexbox from "../containers/flexbox";
 
 export default function Overlay({

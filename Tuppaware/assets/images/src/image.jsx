@@ -1,4 +1,4 @@
-import { replaceDefaults } from "../utils/replacedefaults";
+import { replaceDefaults } from "../../../utils/src/replacedefaults";
 
 export default function Image({
   src,
@@ -8,6 +8,7 @@ export default function Image({
   defaultStyle = { width: "100%", height: "auto" },
   url = "https://www.espn.com",
   ...props
+  
 }) {
   const acceptableTypes = ["png", "jpg", "jpeg", "gif", "svg", "webp"];
   const cleanSrc = String(src).split("?")[0];

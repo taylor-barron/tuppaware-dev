@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { replaceDefaults } from "../../../utils/replacedefaults";
-import useIsBelowBreakPoint from "../../../utils/watchmobilebreakpoint";
+import { replaceDefaults } from "../../../utils/src/replacedefaults";
+import useIsBelowBreakPoint from "../../../utils/src/watchmobilebreakpoint";
 
 import {
   useEmitColumnChanges,

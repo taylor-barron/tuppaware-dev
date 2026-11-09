@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { replaceDefaults } from "../../Tuppaware/utils/replacedefaults";
-import useIsBelowBreakPoint from "../../Tuppaware/utils/watchmobilebreakpoint";
+import { replaceDefaults } from "../utils/src/replacedefaults";
+import useIsBelowBreakPoint from "../utils/src/watchmobilebreakpoint";
 import Flexbox from "../../Tuppaware/containers/flexbox";
 import Header from "../../Tuppaware/text/header";
 import Icon from "../text/icon";
