@@ -22,12 +22,9 @@ import {
 
 } from "../utils/table-service";
 
+import { EMPTY_ARRAY, EMPTY_STYLE, EMPTY_OBJECT, EMPTY_CLASS_NAME, NOOP } from "../../../utils/src/globaldefaults";
+
 import {
-  EMPTY_ARRAY,
-  EMPTY_STYLE,
-  EMPTY_OBJECT,
-  EMPTY_CLASS_NAME,
-  NOOP,
   ACTION_COLUMN,
   DEFAULT_TABLE_STYLE,
   DEFAULT_TABLE_HEAD_STYLE,

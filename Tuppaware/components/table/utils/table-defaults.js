@@ -1,9 +1,3 @@
-export const EMPTY_ARRAY = Object.freeze([]);
-export const EMPTY_STYLE = Object.freeze({});
-export const EMPTY_OBJECT = Object.freeze({});
-export const EMPTY_CLASS_NAME = Object.freeze("");
-export const NOOP = () => {};
-
 export const ACTION_COLUMN = Object.freeze({ name: "Actions" });
 
 export const DEFAULT_TABLE_STYLE = Object.freeze({ maxWidth: "100%", width: "100%", borderCollapse: "collapse", border: "1px 1px 0 0 solid #ddd", fontFamily: "system-ui" });
