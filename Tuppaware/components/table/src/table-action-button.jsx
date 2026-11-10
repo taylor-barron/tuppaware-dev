@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "../../../buttons/button";
+import Button from "../../../buttons/src/button";
 import DropdownButton from "../../../buttons/dropdownbutton";
 
 export default function TableActionButton({
