@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { replaceDefaults } from "../utils/replacedefaults";
+import { replaceDefaults } from "../utils/src/replacedefaults";
 import FlexBox from "../containers/flexbox";
 import Icon from "../text/icon";
 

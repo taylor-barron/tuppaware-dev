@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { replaceDefaults } from "../utils/replacedefaults";
-import useIsBelowBreakPoint from "../utils/watchmobilebreakpoint";
+import { replaceDefaults } from "../utils/src/replacedefaults";
+import useIsBelowBreakPoint from "../utils/src/watchmobilebreakpoint";
 import FlexBox from '../containers/flexbox';
 import Icon from "../text/icon";
-import Image from "../assets/image";
+import Image from "../assets/images/src/image";
 
 export default function Nav({
   mobileBreakpoint = 768,

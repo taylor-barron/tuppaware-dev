@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { replaceDefaults } from "../../../utils/replacedefaults";
-import useIsBelowBreakPoint from "../../../utils/watchmobilebreakpoint";
+import { replaceDefaults } from "../../../utils/src/replacedefaults";
+import useIsBelowBreakPoint from "../../../utils/src/watchmobilebreakpoint";
 
 import {
   useEmitColumnChanges,
@@ -22,12 +22,9 @@ import {
 
 } from "../utils/table-service";
 
+import { EMPTY_ARRAY, EMPTY_STYLE, EMPTY_OBJECT, EMPTY_CLASS_NAME, NOOP } from "../../../utils/src/globaldefaults";
+
 import {
-  EMPTY_ARRAY,
-  EMPTY_STYLE,
-  EMPTY_OBJECT,
-  EMPTY_CLASS_NAME,
-  NOOP,
   ACTION_COLUMN,
   DEFAULT_TABLE_STYLE,
   DEFAULT_TABLE_HEAD_STYLE,
