@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { SORT_ASC, SORT_DESC, SORT_NONE, sortRows, updateColumns } from '../../Tuppaware/components/table/utils/table-service';
-import Button from '../../Tuppaware/buttons/button';
+import Button from '../../Tuppaware/buttons/src/button';
 import DropdownButton from '../../Tuppaware/buttons/dropdownbutton';
 import FlexBox from '../../Tuppaware/containers/flexbox';
 import Header from '../../Tuppaware/text/header';

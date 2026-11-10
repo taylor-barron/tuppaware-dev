@@ -1,6 +1,6 @@
 import React from "react";
 import { replaceDefaults } from "../utils/src/replacedefaults";
-import Button from "./button";
+import Button from "./src/button";
 import Flexbox from "../containers/flexbox";
 import Icon from "../text/icon";
 
